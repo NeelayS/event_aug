@@ -1,4 +1,4 @@
-name: Linting and formatting
+name: Linting and Formatting
 
 on:
   push:
@@ -14,6 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.7', '3.8', '3.9']
+        poetry-version: ['1.2']
 
     steps:
 
@@ -26,10 +27,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install Poetry
-        uses: snok/install-poetry@v1
+        uses: abatilo/actions-poetry@v2.0.0
         with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+          poetry-version: ${{ matrix.poetry-version }}
 
       - name: Install dependencies
         run: poetry install --dev-only
