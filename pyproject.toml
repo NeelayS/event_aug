@@ -10,8 +10,8 @@ numpy = "^1.22.4"
 tables = "^3.7.0"
 opencv-python = "^4.6.0"
 numpy-stl = "^2.17.1"
-snntorch = "^0.5.1"
 matplotlib = "^3.5.2"
+noise = "^1.2.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
