@@ -32,5 +32,5 @@ jobs:
 
       - name: Run pre-commit hooks
         run: |
-          poetry run pre-commit install
-          poetry run pre-commit run -a
+          pre-commit install
+          pre-commit run -a
