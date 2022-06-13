@@ -1,10 +1,17 @@
+from typing import Tuple
+
 import numpy as np
 from noise import pnoise2
 
 
 def gen_perlin_2d(
-    shape=(200, 200), scale=100, octaves=6, persistence=0.5, lacunarity=2.0, seed=None
-):
+    shape: Tuple[int, int] = (200, 200),
+    scale: int = 100,
+    octaves: int = 6,
+    persistence: float = 0.5,
+    lacunarity: float = 2.0,
+    seed: int = 0,
+) -> np.ndarray:
 
     if not seed:
         seed = np.random.randint(0, 100)
