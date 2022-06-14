@@ -15,9 +15,9 @@ def test_rate_code():
     assert out.shape == (2, 2, 2)
 
     arr = np.stack([arr_n, arr_n], axis=0)
-    out = rate_code(arr)
+    out = rate_code(arr, gain=0.1)
     assert out.shape == (2, 2, 2)
 
     arr = torch.stack([arr_t, arr_t], axis=0)
-    out = rate_code(arr)
+    out = rate_code(arr, n_steps=2, gain=0.3)
     assert out.shape == (2, 2, 2)
