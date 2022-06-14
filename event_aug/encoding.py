@@ -4,7 +4,9 @@ import numpy as np
 import torch
 
 
-def rate_code(arr: Union[np.ndarray, torch.Tensor], n_steps: int = 1) -> np.ndarray:
+def rate_code(
+    arr: Union[np.ndarray, torch.Tensor], n_steps: int = 1, gain: int = 1
+) -> np.ndarray:
 
     """
     Converts array of continuous input data to spikes using rate coding.
@@ -18,6 +20,8 @@ def rate_code(arr: Union[np.ndarray, torch.Tensor], n_steps: int = 1) -> np.ndar
     n_steps: int
         Number of time-steps to perform rate coding for. Only used for 2D input data.
         In case of time series data, rate coding is performed for each time-step.
+    gain: int
+        Factor by which to scale normalized input features.
 
     Returns
     -------
@@ -26,6 +30,7 @@ def rate_code(arr: Union[np.ndarray, torch.Tensor], n_steps: int = 1) -> np.ndar
     """
 
     arr = arr / np.linalg.norm(arr)
+    arr = arr * gain
 
     if not isinstance(arr, torch.Tensor):
         arr = torch.from_numpy(arr).float()
