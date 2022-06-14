@@ -13,6 +13,30 @@ def gen_perlin_2d(
     seed: int = 0,
 ) -> np.ndarray:
 
+    """
+    Generated 2D Perlin noise.
+
+    Parameters
+    ----------
+    shape: Tuple[int, int]
+        Shape of the 2D output array.
+    scale: int
+        Scale of the noise.
+    octaves: int
+        Number of octaves to use.
+    persistence: float
+        Persistence of the Perlin noise.
+    lacunarity: float
+        Lacunarity of the Perlin noise.
+    seed: int
+        Seed for the noise generation.
+
+    Returns
+    -------
+    np.ndarray
+        2D array of Perlin noise.
+    """
+
     if not seed:
         seed = np.random.randint(0, 100)
 
