@@ -51,12 +51,12 @@ jobs:
           poetry run pytest tests/
 
       - name: Generate code coverage report
-        run: |
-          poetry run pytest --cov=./ --cov-report=xml
+        run: pytest --cov-report xml --cov='./ezflow/' --cov-config=.coveragerc
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v1
+        if: always()
         with:
-          directory: ./coverage/reports/
           fail_ci_if_error: false
-          verbose: true
+          file: coverage.xml
+          env_vars: OS,PYTHON
