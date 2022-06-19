@@ -45,7 +45,9 @@ jobs:
           poetry install --no-interaction --no-root
 
       - name: Install package
-        run: poetry install --no-interaction    
+        run: |
+          poetry run pytest --version || rm -rf .venv 
+          poetry install --no-interaction    
         
       - name: Test with Pytest
         run: |
