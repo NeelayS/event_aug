@@ -8,7 +8,7 @@
 - **Project-related links**:
   - [Code Repository](https://github.com/NeelayS/gsoc-2022/tree/gh-pages)
   - [GSoC Project Page](https://summerofcode.withgoogle.com/programs/2022/projects/dSlJsb1g)
-  - [Blog](https://neelays.github.io/gsoc-2022/)
+  - [Blog](https://neelays.github.io/event-aug/)
 
 ### Project Abstract
 
