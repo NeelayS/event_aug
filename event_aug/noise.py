@@ -25,9 +25,9 @@ def gen_perlin_2d(
     octaves: int
         Number of octaves to use.
     persistence: float
-        Persistence of the Perlin noise.
+        Scaling factor between two octaves.
     lacunarity: float
-        Lacunarity of the Perlin noise.
+        Frequency factor between two octaves.
     seed: int
         Seed for the noise generation.
 
