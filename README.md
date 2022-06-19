@@ -1,1 +1,3 @@
-# gsoc-2022
+# event-aug
+
+A Python package for augmenting event-camera datasets
