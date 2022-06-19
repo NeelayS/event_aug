@@ -54,7 +54,7 @@ def delta_intensity_code(
     data: Union[np.ndarray, torch.Tensor],
     threshold: int,
     use_negative_delta=True,
-    ignore_start=False,
+    exclude_start=False,
 ) -> Union[np.ndarray, torch.Tensor]:
 
     """
@@ -70,7 +70,7 @@ def delta_intensity_code(
         for assigning an event.
     use_negative_delta: bool
         Whether to consider decreases in intensity as well along with increases.
-    ignore_start: bool
+    exclude_start: bool
         Whether to not return the spikes for the first frame which will always be 0 for all pixels.
 
     Returns
@@ -94,7 +94,7 @@ def delta_intensity_code(
 
         spikes[i][intensity_delta > threshold] = 1
 
-    if ignore_start:
+    if exclude_start:
         return spikes[1:]
 
     return spikes

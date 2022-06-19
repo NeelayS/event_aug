@@ -34,10 +34,10 @@ def test_delta_intensity_code():
     out = delta_intensity_code(data_t, threshold=25, use_negative_delta=False)
     assert out.shape == (10, 32, 32)
 
-    out = delta_intensity_code(data_t, threshold=25, ignore_start=True)
+    out = delta_intensity_code(data_t, threshold=25, exclude_start=True)
     assert out.shape == (9, 32, 32)
 
     out = delta_intensity_code(
-        data_t.numpy(), threshold=25, ignore_start=True, use_negative_delta=False
+        data_t.numpy(), threshold=25, exclude_start=True, use_negative_delta=False
     )
     assert out.shape == (9, 32, 32)
