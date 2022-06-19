@@ -8,7 +8,7 @@
 - **Project-related links**:
   - [Code Repository](https://github.com/NeelayS/gsoc-2022/tree/gh-pages)
   - [GSoC Project Page](https://summerofcode.withgoogle.com/programs/2022/projects/dSlJsb1g)
-  - [Blog](https://github.com/NeelayS/gsoc-2022/tree/gh-pages)
+  - [Blog](https://neelays.github.io/gsoc-2022/)
 
 ### Project Abstract
 
@@ -26,7 +26,7 @@ Event-based vision is a subfield of computer vision that deals with data from ev
 
 - Added code for generating 2D Perlin noise
 - Added code for spike encoding of image / video data using rate coding
-- Set up conitnuous integration (CI) for the package which includes unit tests and linting and formatting checks
+- Set up continuous integration (CI) for the package which includes unit tests and linting and formatting checks
 
 #### Week 1 ( 13th June - 19th June)
 
