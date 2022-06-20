@@ -64,7 +64,7 @@ def delta_intensity_code(
     Parameters
     ----------
     data: np.ndarray or torch.Tensor
-        Array containing the video data (frames). Should be of shape (T x H x W).
+        Array containing the video data (frames). Should be of shape (T x H x W) or (T x H x W x C).
     threshold: int
         Threshold for the difference in intensities of pixels in consecutive frames
         for assigning an event.
@@ -79,7 +79,7 @@ def delta_intensity_code(
         Array containing the spikes.
     """
 
-    assert len(data.shape) == 3, "Input must be a 3D array with shape (T x H x W)"
+    assert len(data.shape) == 3 or len(data.shape) == 4, "Input must be an array with shape (T x H x W) or (T x H x W x C)"
 
     if isinstance(data, torch.Tensor):
         spikes = torch.zeros_like(data)

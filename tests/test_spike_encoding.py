@@ -26,7 +26,7 @@ def test_rate_code():
 
 def test_delta_intensity_code():
 
-    data_t = (torch.randn(10, 32, 32) * 255).type(torch.LongTensor)
+    data_t = (torch.rand(10, 32, 32) * 255).type(torch.LongTensor)
 
     out = delta_intensity_code(data_t, threshold=25)
     assert out.shape == (10, 32, 32)
