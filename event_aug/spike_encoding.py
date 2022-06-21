@@ -79,7 +79,9 @@ def delta_intensity_code(
         Array containing the spikes.
     """
 
-    assert len(data.shape) == 3 or len(data.shape) == 4, "Input must be an array with shape (T x H x W) or (T x H x W x C)"
+    assert (
+        len(data.shape) == 3 or len(data.shape) == 4
+    ), "Input must be an array with shape (T x H x W) or (T x H x W x C)"
 
     if isinstance(data, torch.Tensor):
         spikes = torch.zeros_like(data)
