@@ -2,6 +2,7 @@ from typing import Union
 
 import numpy as np
 import torch
+from skvideo.io import vread, vwrite
 
 
 def rate_code(
@@ -53,8 +54,8 @@ def rate_code(
 def delta_intensity_code(
     data: Union[np.ndarray, torch.Tensor],
     threshold: int,
-    use_negative_delta=True,
-    exclude_start=False,
+    use_negative_delta: bool = True,
+    exclude_start: bool = False,
 ) -> Union[np.ndarray, torch.Tensor]:
 
     """
@@ -98,5 +99,31 @@ def delta_intensity_code(
 
     if exclude_start:
         return spikes[1:]
+
+    return spikes
+
+
+def encode_video(
+    video_path: str,
+    save_out_video: bool = False,
+    save_path: str = None,
+    threshold: int = 25,
+    use_negative_delta: bool = False,
+    exclude_start: bool = False,
+) -> np.ndarray:
+
+    video = vread(video_path)
+    spikes = delta_intensity_code(
+        video,
+        threshold=threshold,
+        use_negative_delta=use_negative_delta,
+        exclude_start=exclude_start,
+    )
+
+    if save_out_video is True:
+        assert save_path is not None, "Path must be provided to save output video"
+
+        spikes = (spikes * 255).astype(np.uint8)
+        vwrite(save_path, spikes)
 
     return spikes
