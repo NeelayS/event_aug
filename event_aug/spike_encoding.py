@@ -53,8 +53,8 @@ def rate_code(
 def delta_intensity_code(
     data: Union[np.ndarray, torch.Tensor],
     threshold: int,
-    use_negative_delta=True,
-    exclude_start=False,
+    use_negative_delta: bool = True,
+    exclude_start: bool = False,
 ) -> Union[np.ndarray, torch.Tensor]:
 
     """
