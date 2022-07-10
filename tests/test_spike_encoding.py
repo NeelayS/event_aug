@@ -1,7 +1,11 @@
 import numpy as np
 import torch
 
-from event_aug.spike_encoding import delta_intensity_code, rate_code
+from event_aug.spike_encoding import (
+    delta_intensity_code_arr,
+    delta_intensity_code_video,
+    rate_code,
+)
 
 
 def test_rate_code():
@@ -24,25 +28,35 @@ def test_rate_code():
     assert out.shape == (2, 2, 2)
 
 
-def test_delta_intensity_code():
+def test_delta_intensity_code_arr():
 
-    data_t = (torch.rand(10, 32, 32) * 255).type(torch.LongTensor)
+    data = (np.random.rand(10, 32, 32) * 255).astype(np.uint8)
 
-    out = delta_intensity_code(data_t, threshold=25)
+    out = delta_intensity_code_arr(data, threshold=25)
     assert out.shape == (10, 32, 32)
 
-    out = delta_intensity_code(data_t, threshold=25, use_negative_delta=False)
+    out = delta_intensity_code_arr(data, threshold=25, use_neg_delta=False)
     assert out.shape == (10, 32, 32)
 
-    out = delta_intensity_code(data_t, threshold=25, exclude_start=True)
+    out = delta_intensity_code_arr(data, threshold=25, exclude_start=True)
     assert out.shape == (9, 32, 32)
 
-    out = delta_intensity_code(
-        data_t.numpy(), threshold=25, exclude_start=True, use_negative_delta=False
+    out = delta_intensity_code_arr(
+        torch.from_numpy(data), threshold=25, exclude_start=True, use_neg_delta=False
     )
     assert out.shape == (9, 32, 32)
 
-    data_t = (torch.rand(10, 32, 32, 3) * 255).type(torch.LongTensor)
+    data = (np.random.rand(10, 32, 32, 3) * 255).astype(np.uint8)
 
-    out = delta_intensity_code(data_t, threshold=25)
-    assert out.shape == (10, 32, 32, 3)
+    out = delta_intensity_code_arr(data, threshold=25)
+    assert out.shape == (10, 32, 32)
+
+
+def test_delta_intensity_code():
+
+    data = (np.random.rand(10, 32, 32) * 255).astype(np.uint8)
+
+    out = delta_intensity_code_video(
+        video_arr=data, threshold=25, use_neg_delta=False, exclude_start=False
+    )
+    assert out.shape == (10, 32, 32)

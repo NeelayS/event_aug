@@ -1,8 +1,8 @@
 from typing import Union
 
+import cv2
 import numpy as np
 import torch
-from skvideo.io import vread, vwrite
 
 
 def rate_code(
@@ -36,9 +36,10 @@ def rate_code(
     if not isinstance(data, torch.Tensor):
         data = torch.from_numpy(data).float()
 
-    assert (
-        len(data.shape) == 2 or len(data.shape) == 3
-    ), "Input must be a 2D array of probabilities or a 3D array in case of time series data"
+    assert len(data.shape) == 2 or len(data.shape) == 3, (
+        "Input must be a 2D array of probabilities or a 3D array in case of time series"
+        " data"
+    )
 
     if len(data.shape) == 2 and n_steps > 1:
         new_data = torch.clone(data)
@@ -51,26 +52,26 @@ def rate_code(
     return spikes.numpy()
 
 
-def delta_intensity_code(
-    data: Union[np.ndarray, torch.Tensor],
+def delta_intensity_code_arr(
+    arr: Union[np.ndarray, torch.Tensor],
     threshold: int,
-    use_negative_delta: bool = True,
+    use_neg_delta: bool = True,
     exclude_start: bool = False,
 ) -> Union[np.ndarray, torch.Tensor]:
 
     """
-    Converts video data to spikes. If the difference in the intensity of a pixel in
+    Converts a video data array to spikes. If the difference in the intensity of a pixel in
     consecutive frames is greater than the threshold, the pixel is assigned an event.
 
     Parameters
     ----------
-    data: np.ndarray or torch.Tensor
+    arr: np.ndarray or torch.Tensor
         Array containing the video data (frames). Should be of shape (T x H x W) or (T x H x W x C).
     threshold: int
         Threshold for the difference in intensities of pixels in consecutive frames
         for assigning an event.
-    use_negative_delta: bool
-        Whether to consider decreases in intensity as well along with increases.
+    use_neg_delta: bool
+        Whether to consider decreases in intensity as well along with increases for assigning events.
     exclude_start: bool
         Whether to not return the spikes for the first frame which will always be 0 for all pixels.
 
@@ -81,18 +82,32 @@ def delta_intensity_code(
     """
 
     assert (
-        len(data.shape) == 3 or len(data.shape) == 4
+        len(arr.shape) == 3 or len(arr.shape) == 4
     ), "Input must be an array with shape (T x H x W) or (T x H x W x C)"
 
-    if isinstance(data, torch.Tensor):
-        spikes = torch.zeros_like(data)
+    if isinstance(arr, torch.Tensor):
+        arr = arr.numpy()
+        torch_inp_arr = True
     else:
-        spikes = np.zeros_like(data)
+        torch_inp_arr = False
 
-    for i in range(1, data.shape[0]):
+    multi_channel = len(arr.shape) == 4
 
-        intensity_delta = data[i] - data[i - 1]
-        if use_negative_delta:
+    T = arr.shape[0]
+    H, W = arr.shape[1], arr.shape[2]
+
+    spikes = np.zeros((T, H, W))
+
+    for i in range(1, arr.shape[0]):
+
+        prev_frame, curr_frame = np.float32(arr[i - 1]), np.float32(arr[i])
+
+        if multi_channel:
+            curr_frame = cv2.cvtColor(curr_frame, cv2.COLOR_RGB2GRAY)
+            prev_frame = cv2.cvtColor(prev_frame, cv2.COLOR_RGB2GRAY)
+
+        intensity_delta = curr_frame - prev_frame
+        if use_neg_delta:
             intensity_delta = abs(intensity_delta)
 
         spikes[i][intensity_delta > threshold] = 1
@@ -100,30 +115,133 @@ def delta_intensity_code(
     if exclude_start:
         return spikes[1:]
 
+    if torch_inp_arr is True:
+        return torch.from_numpy(spikes)
+
     return spikes
 
 
-def encode_video(
+def delta_intensity_code_file(
     video_path: str,
-    save_out_video: bool = False,
-    save_path: str = None,
+    save_path: str,
     threshold: int = 25,
-    use_negative_delta: bool = False,
-    exclude_start: bool = False,
-) -> np.ndarray:
+    out_fps: int = None,
+    use_neg_delta: bool = False,
+) -> None:
 
-    video = vread(video_path)
-    spikes = delta_intensity_code(
-        video,
-        threshold=threshold,
-        use_negative_delta=use_negative_delta,
-        exclude_start=exclude_start,
+    """
+    Reads a video file, convert the video to spiking form and saves to a file. If the difference in the intensity of a pixel in
+    consecutive frames is greater than the threshold, the pixel is assigned an event.
+
+    Parameters
+    ----------
+    video_path: str
+        Path to the input video file.
+    save_path: str
+        Path to save the output video file to.
+    threshold: int
+        Threshold for the difference in intensities of pixels in consecutive frames
+        for assigning events.
+    out_fps: int
+        Output video frame rate.
+    use_neg_delta: bool
+        Whether to consider decreases in intensity as well along with increases for assigning events.
+
+    """
+
+    vid = cv2.VideoCapture(video_path)
+
+    W, H = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)), int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    fps = int(vid.get(cv2.CAP_PROP_FPS))
+    if out_fps is None:
+        out_fps = fps
+
+    n_frames = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    print(
+        f"Frame width: {W}, Frame height: {H}, FPS: {fps}, Number of frames: {n_frames}"
     )
 
-    if save_out_video is True:
-        assert save_path is not None, "Path must be provided to save output video"
+    out_vid = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), out_fps, (W, H))
+    prev_frame = np.ones((H, W)) * 255
 
-        spikes = (spikes * 255).astype(np.uint8)
-        vwrite(save_path, spikes)
+    while True:
 
-    return spikes
+        ret, frame = vid.read()
+        if ret is False:
+            break
+
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame = frame.astype(np.float32)
+
+        delta = frame - prev_frame
+        prev_frame = frame
+
+        if use_neg_delta is True:
+            delta = abs(delta)
+
+        delta[delta > threshold] = 255
+        delta[delta <= threshold] = 0
+
+        delta = delta.astype(np.uint8)
+        delta = cv2.cvtColor(delta, cv2.COLOR_GRAY2BGR)
+
+        out_vid.write(delta)
+
+    vid.release()
+    out_vid.release()
+
+
+def delta_intensity_code_video(
+    video_path: str = None,
+    video_arr: Union[np.ndarray, torch.Tensor] = None,
+    threshold: int = 25,
+    use_neg_delta: bool = False,
+    save_path: str = None,
+    out_fps: int = None,
+    exclude_start: bool = False,
+) -> Union[np.ndarray, None]:
+
+    """
+    Converts a video to spiking form. If the difference in the intensity of a pixel in
+    consecutive frames is greater than the threshold, the pixel is assigned an event.
+    Works with either a video file or a video array.
+
+    Parameters
+    ----------
+    video_path: str
+        Path to the input video file.
+    video_arr: np.ndarray or torch.Tensor
+        Array containing the video data (frames). Should be of shape (T x H x W) or (T x H x W x C).
+    threshold: int
+        Threshold for the difference in intensities of pixels in consecutive frames
+        for assigning events.
+    use_neg_delta: bool
+        Whether to consider decreases in intensity as well along with increases for assigning events.
+    save_path: str
+        Path to save the output video file to (required if input video is a file).
+    out_fps: int
+        Output video frame rate (required if input video is a file).
+    exclude_start: bool
+        Whether to not return the spikes for the first frame which will always be 0 for all pixels (required if input video is a file).
+    """
+
+    assert (
+        video_path is not None or video_arr is not None
+    ), "Either video_path or video_arr must be provided"
+
+    if video_path is not None:
+        assert (
+            save_path is not None
+        ), "save_path must be provided if video_path is provided"
+
+        delta_intensity_code_file(
+            video_path, save_path, threshold, out_fps, use_neg_delta
+        )
+
+    else:
+        spikes = delta_intensity_code_arr(
+            video_arr, threshold, use_neg_delta, exclude_start
+        )
+        return spikes
