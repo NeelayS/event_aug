@@ -16,3 +16,4 @@ comment:
 
 ignore:
   - "*.sh"
+  - "scripts/*"
