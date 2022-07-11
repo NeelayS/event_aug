@@ -24,9 +24,10 @@ def shift_range(arr: np.ndarray):
         Array with shifted range
     """
 
-    arr -= np.min(arr)
-    arr /= np.max(arr)
-    arr = arr * 255
+    max_arr = np.max(arr)
+    min_arr = np.min(arr)
+    arr = (arr - min_arr) / (max_arr - min_arr)
+    # arr = arr * 255
 
     return arr
 
@@ -198,7 +199,7 @@ def gen_perlin_3d(
     noise = postprocess_3d_noise(noise, reshape_size, crop_size)
 
     if save_path is not None:
-        imgs_to_video(save_path, img_arr=noise, out_fps=out_fps)
+        imgs_to_video(save_path, img_arr=noise * 255, out_fps=out_fps)
 
     return noise
 
@@ -254,6 +255,6 @@ def gen_fractal_3d(
     noise = postprocess_3d_noise(noise, reshape_size, crop_size)
 
     if save_path is not None:
-        imgs_to_video(save_path, img_arr=noise, out_fps=out_fps)
+        imgs_to_video(save_path, img_arr=noise * 255, out_fps=out_fps)
 
     return noise
