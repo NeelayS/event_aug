@@ -1,9 +1,19 @@
-import cv2
-import numpy as np
 import os
 
+import cv2
+import numpy as np
 
-def imgs_to_video(save_path: str, img_dir: str = None, img_arr: np.ndarray = None, height: int = None, width: int = None, out_fps: int = 15, numbered_imgs: bool = False, verbose: bool = False):
+
+def imgs_to_video(
+    save_path: str,
+    img_dir: str = None,
+    img_arr: np.ndarray = None,
+    height: int = None,
+    width: int = None,
+    out_fps: int = 15,
+    numbered_imgs: bool = False,
+    verbose: bool = False,
+):
 
     """
     Converts a directory of images or an array / list og image data to a video.
@@ -28,7 +38,9 @@ def imgs_to_video(save_path: str, img_dir: str = None, img_arr: np.ndarray = Non
         Whether to print progress.
     """
 
-    assert img_dir is not None or img_arr is not None, "Either img_dir or img_arr must be provided"
+    assert (
+        img_dir is not None or img_arr is not None
+    ), "Either img_dir or img_arr must be provided"
 
     if img_dir is not None:
 
@@ -64,7 +76,7 @@ def imgs_to_video(save_path: str, img_dir: str = None, img_arr: np.ndarray = Non
                 img_path = os.path.join(img_dir, name)
 
             img = cv2.imread(img_path)
-    
+
             if verbose is True:
                 print(f"Writing {img_path}")
 
