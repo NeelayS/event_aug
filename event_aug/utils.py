@@ -16,7 +16,7 @@ def imgs_to_video(
 ):
 
     """
-    Converts a directory of images or an array / list og image data to a video.
+    Converts a directory of images or an array / list of image data to a video.
 
     Parameters
     ----------
