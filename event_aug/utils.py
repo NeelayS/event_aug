@@ -21,7 +21,7 @@ def imgs_to_video(
     Parameters
     ----------
     save_path : str
-        Path to the output video file.
+        Path (.mp4) to the output video file.
     img_dir : str
         Path to the directory containing the images.
     imgs_arr : np.ndarray or list
