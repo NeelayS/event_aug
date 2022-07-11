@@ -32,6 +32,8 @@ def gen_perlin_2d(
         Frequency factor between two octaves.
     seed: int
         Seed for the noise generation.
+    save_path: str
+        Path to save the generated noise as an image.
 
     Returns
     -------
