@@ -13,6 +13,7 @@ numpy-stl = "^2.17.1"
 matplotlib = "^3.5.2"
 noise = "^1.2.2"
 torch = "^1.11.0"
+perlin-numpy = {git = "https://github.com/pvigier/perlin-numpy"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

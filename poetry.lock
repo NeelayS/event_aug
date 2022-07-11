@@ -436,6 +436,24 @@ qa = ["flake8 (==3.8.3)", "mypy (==0.782)"]
 testing = ["docopt", "pytest (<6.0.0)"]
 
 [[package]]
+name = "perlin-numpy"
+version = "0.0.0"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3"
+develop = false
+
+[package.dependencies]
+numpy = ">=1.15"
+
+[package.source]
+type = "git"
+url = "https://github.com/pvigier/perlin-numpy"
+reference = "master"
+resolved_reference = "6f077f811f5708e504732c26dee8f2015b95da0c"
+
+[[package]]
 name = "pexpect"
 version = "4.8.0"
 description = "Pexpect allows easy control of interactive console applications."
@@ -810,7 +828,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "42096acb8b68cc926bd9e0cac28150c5fa1222e5691d4ec9a93324b43bb6bcc2"
+content-hash = "1217c04e4bfac080b7c543f074034b3c345915079da0e0227e2019b6a373c43a"
 
 [metadata.files]
 appnope = [
@@ -1184,6 +1202,7 @@ parso = [
     {file = "parso-0.8.3-py2.py3-none-any.whl", hash = "sha256:c001d4636cd3aecdaf33cbb40aebb59b094be2a74c556778ef5576c175e19e75"},
     {file = "parso-0.8.3.tar.gz", hash = "sha256:8c07be290bb59f03588915921e29e8a50002acaf2cdc5fa0e0114f91709fafa0"},
 ]
+perlin-numpy = []
 pexpect = [
     {file = "pexpect-4.8.0-py2.py3-none-any.whl", hash = "sha256:0b48a55dcb3c05f3329815901ea4fc1537514d6ba867a152b581d69ae3710937"},
     {file = "pexpect-4.8.0.tar.gz", hash = "sha256:fc65a43959d153d0114afe13997d439c22823a27cefceb5ff35c2178c6784c0c"},
