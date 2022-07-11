@@ -1,5 +1,6 @@
 from typing import Tuple
 
+import cv2
 import numpy as np
 from noise import pnoise2
 
@@ -11,6 +12,7 @@ def gen_perlin_2d(
     persistence: float = 0.5,
     lacunarity: float = 2.0,
     seed: int = 0,
+    save_path: str = None,
 ) -> np.ndarray:
 
     """
@@ -30,6 +32,8 @@ def gen_perlin_2d(
         Frequency factor between two octaves.
     seed: int
         Seed for the noise generation.
+    save_path: str
+        Path to save the generated noise as an image.
 
     Returns
     -------
@@ -57,5 +61,8 @@ def gen_perlin_2d(
     max_arr = np.max(arr)
     min_arr = np.min(arr)
     arr = (arr - min_arr) / (max_arr - min_arr)
+
+    if save_path is not None:
+        cv2.imwrite(save_path, arr * 255)
 
     return arr
