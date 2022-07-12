@@ -148,14 +148,11 @@ def gen_perlin_2d(
                 base=seed,
             )
 
-    max_arr = np.max(arr)
-    min_arr = np.min(arr)
-    arr = (arr - min_arr) / (max_arr - min_arr)
+    arr = shift_range(arr)
+    arr = downsample(arr, reshape_size, crop_size)
 
     if save_path is not None:
         cv2.imwrite(save_path, arr * 255)
-
-    arr = downsample(arr, reshape_size, crop_size)
 
     return arr
 
