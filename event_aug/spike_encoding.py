@@ -160,7 +160,8 @@ def delta_intensity_code_file(
     n_frames = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
 
     print(
-        f"Frame width: {W}, Frame height: {H}, FPS: {fps}, Number of frames: {n_frames}"
+        f"Frame width: {W}, Frame height: {H}, Input FPS: {fps}, Output FPS: {out_fps},"
+        f" Number of frames: {n_frames}"
     )
 
     out_vid = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), out_fps, (W, H))

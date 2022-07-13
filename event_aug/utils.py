@@ -59,6 +59,7 @@ def imgs_to_video(
     out_vid = cv2.VideoWriter(
         save_path, cv2.VideoWriter_fourcc(*"mp4v"), out_fps, (width, height)
     )
+    print(f"Frame width: {width}, Frame height: {height}, FPS: {out_fps}")
 
     for i, name in sorted(enumerate(os.listdir(img_dir))):
 
