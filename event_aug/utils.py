@@ -25,7 +25,8 @@ def imgs_to_video(
     img_dir : str
         Path to the directory containing the images.
     imgs_arr : np.ndarray or list
-        Array containing the image data. If multi-dimensional array, it should be of shape (T x H x W) or (T x H x W x C).
+        Array containing the image data. If it's a list, it should contain as many images as number of frames wanted.
+        If it's a multi-dimensional array, it should be of shape (T x H x W) or (T x H x W x C).
     height : int
         Height of the images.
     width : int
@@ -45,6 +46,7 @@ def imgs_to_video(
     if img_dir is not None:
 
         img_list = sorted(os.listdir(img_dir))
+        n_images = len(img_list)
 
         if height is None or width is None:
             sample_img = cv2.imread(os.path.join(img_dir, img_list[0]))
@@ -53,6 +55,7 @@ def imgs_to_video(
         extension = img_list[0][-4:]
 
     else:
+        n_images = img_arr.shape[0]
         height, width = img_arr[0].shape[:2]
         is_grayscale = len(img_arr[0].shape) == 2
 
@@ -61,7 +64,7 @@ def imgs_to_video(
     )
     print(f"Frame width: {width}, Frame height: {height}, FPS: {out_fps}")
 
-    for i, name in sorted(enumerate(os.listdir(img_dir))):
+    for i in range(n_images):
 
         if img_arr is not None:
             img = img_arr[i]
@@ -74,7 +77,7 @@ def imgs_to_video(
             if numbered_imgs:
                 img_path = os.path.join(img_dir, str(i) + extension)
             else:
-                img_path = os.path.join(img_dir, name)
+                img_path = os.path.join(img_dir, img_list[i])
 
             img = cv2.imread(img_path)
 
