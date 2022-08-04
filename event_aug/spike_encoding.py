@@ -54,8 +54,9 @@ def rate_code(
 
 def delta_intensity_code_arr(
     arr: Union[np.ndarray, torch.Tensor],
-    threshold: int = None,
-    percent_threshold: int = None,
+    threshold: int = 15,
+    percent_threshold: int = 10,
+    mode: str = "threshold",
     use_neg_delta: bool = True,
     exclude_start: bool = False,
 ) -> Union[np.ndarray, torch.Tensor]:
@@ -74,6 +75,8 @@ def delta_intensity_code_arr(
     percent_threshold: int
         Pixel-wise percentage threshold for the difference in intensities of pixels in consecutive frames
         for assigning events.
+    mode: str
+        Whether to use 'threshold' or 'percent_threshold'".
     use_neg_delta: bool
         Whether to consider decreases in intensity as well along with increases for assigning events.
     exclude_start: bool
@@ -92,6 +95,12 @@ def delta_intensity_code_arr(
     assert (
         threshold is not None or percent_threshold is not None
     ), "Either threshold or percent_threshold must be specified"
+
+    mode = mode.lower()
+    assert mode in [
+        "threshold",
+        "percent_threshold",
+    ], "Mode must be either 'threshold' or 'percent_threshold'"
 
     if isinstance(arr, torch.Tensor):
         arr = arr.numpy()
@@ -118,7 +127,7 @@ def delta_intensity_code_arr(
         if use_neg_delta:
             intensity_delta = abs(intensity_delta)
 
-        if threshold is not None:
+        if mode == "threshold":
             spikes[i][intensity_delta > threshold] = 1
         else:
             percent_frame_delta = prev_frame * percent_threshold / 100
@@ -136,8 +145,9 @@ def delta_intensity_code_arr(
 def delta_intensity_code_file(
     video_path: str,
     save_path: str,
-    threshold: int = None,
-    percent_threshold: int = None,
+    threshold: int = 15,
+    percent_threshold: int = 10,
+    mode: str = "threshold",
     out_fps: int = None,
     use_neg_delta: bool = False,
 ) -> None:
@@ -158,6 +168,8 @@ def delta_intensity_code_file(
     percent_threshold: int
         Pixel-wise percentage threshold for the difference in intensities of pixels in consecutive frames
         for assigning events.
+    mode: str
+        Whether to use 'threshold' or 'percent_threshold'".
     out_fps: int
         Output video frame rate.
     use_neg_delta: bool
@@ -168,6 +180,12 @@ def delta_intensity_code_file(
     assert (
         threshold is not None or percent_threshold is not None
     ), "Either threshold or percent_threshold must be specified"
+
+    mode = mode.lower()
+    assert mode in [
+        "threshold",
+        "percent_threshold",
+    ], "Mode must be either 'threshold' or 'percent_threshold'"
 
     vid = cv2.VideoCapture(video_path)
 
@@ -202,7 +220,7 @@ def delta_intensity_code_file(
         if use_neg_delta is True:
             delta = abs(delta)
 
-        if threshold is not None:
+        if mode == "threshold":
             delta[delta > threshold] = 255
             delta[delta <= threshold] = 0
         else:
@@ -222,8 +240,9 @@ def delta_intensity_code_file(
 def delta_intensity_code_video(
     video_path: str = None,
     video_arr: Union[np.ndarray, torch.Tensor] = None,
-    threshold: int = None,
-    percent_threshold: int = None,
+    threshold: int = 15,
+    percent_threshold: int = 10,
+    mode: str = "threshold",
     use_neg_delta: bool = False,
     save_path: str = None,
     out_fps: int = None,
@@ -247,6 +266,8 @@ def delta_intensity_code_video(
     percent_threshold: int
         Pixel-wise percentage threshold for the difference in intensities of pixels in consecutive frames
         for assigning events.
+    mode: str
+        Whether to use 'threshold' or 'percent_threshold'".
     use_neg_delta: bool
         Whether to consider decreases in intensity as well along with increases for assigning events.
     save_path: str
@@ -271,12 +292,13 @@ def delta_intensity_code_video(
             save_path,
             threshold,
             percent_threshold,
+            mode,
             out_fps,
             use_neg_delta,
         )
 
     else:
         spikes = delta_intensity_code_arr(
-            video_arr, threshold, percent_threshold, use_neg_delta, exclude_start
+            video_arr, threshold, percent_threshold, mode, use_neg_delta, exclude_start
         )
         return spikes
