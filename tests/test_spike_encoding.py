@@ -35,6 +35,9 @@ def test_delta_intensity_code_arr():
     out = delta_intensity_code_arr(data, threshold=25)
     assert out.shape == (10, 32, 32)
 
+    out = delta_intensity_code_arr(data, percent_delta_threshold=10)
+    assert out.shape == (10, 32, 32)
+
     out = delta_intensity_code_arr(data, threshold=25, use_neg_delta=False)
     assert out.shape == (10, 32, 32)
 
