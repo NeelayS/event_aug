@@ -88,3 +88,50 @@ def imgs_to_video(
         out_vid.write(img)
 
     out_vid.release()
+
+
+def save_video_frames_diffs(
+    video_path: str, save_path: str, out_fps: int = None, neg_diff: bool = False
+):
+
+    vid = cv2.VideoCapture(video_path)
+
+    W, H = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)), int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    fps = int(vid.get(cv2.CAP_PROP_FPS))
+    if out_fps is None:
+        out_fps = fps
+
+    out_vid = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), out_fps, (W, H))
+
+    prev_frame = np.ones((H, W)) * 255
+
+    i = 0
+    while True:
+
+        ret, frame = vid.read()
+
+        if ret is False:
+            break
+
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame = frame.astype(np.float32)
+
+        delta = frame - prev_frame
+        prev_frame = frame
+
+        if neg_diff is True:
+            delta = abs(delta)
+        else:
+            delta = np.maximum(delta, 0)
+
+        delta = delta * 255 / np.max(delta)
+        delta = np.uint8(delta)
+
+        delta = cv2.cvtColor(delta, cv2.COLOR_GRAY2BGR)
+        out_vid.write(delta)
+
+        i += 1
+
+    vid.release()
+    out_vid.release()
