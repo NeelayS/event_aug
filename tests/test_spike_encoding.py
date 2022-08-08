@@ -16,8 +16,8 @@ def test_rate_code():
     out = rate_code(data_n)
     assert out.shape == (2, 2)
 
-    out = rate_code(data_t, n_steps=2)
-    assert out.shape == (2, 2, 2)
+    out = rate_code(data_t, n_steps=4)
+    assert out.shape == (4, 2, 2)
 
     data = np.stack([data_n, data_n], axis=0)
     out = rate_code(data, gain=0.1)

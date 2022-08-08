@@ -42,9 +42,12 @@ def rate_code(
     )
 
     if len(data.shape) == 2 and n_steps > 1:
-        new_data = torch.clone(data)
+
+        new_data = torch.clone(data).unsqueeze(0)
+        data = data.unsqueeze(0)
+
         for _ in range(n_steps - 1):
-            new_data = torch.stack((new_data, data))
+            new_data = torch.cat((new_data, data))
         data = new_data
 
     spikes = torch.bernoulli(data)
