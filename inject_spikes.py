@@ -176,24 +176,31 @@ def inject_event_spikes(
                 timestamps[timestamp_key], timestep
             )
 
-        for coord in spike_coords:
+        for (
+            timestamp_key,
+            xy_key,
+            label_key,
+            polarity_key,
+        ) in zip(timestamps.keys(), xy_coords.keys(), labels.keys(), polarities.keys()):
 
-            for timestamp_key, xy_key, label_key, polarity_key, in zip(
-                timestamps.keys(), xy_coords.keys(), labels.keys(), polarities.keys()
-            ):
+            insertion_timesteps = [timestep for _ in range(len(spike_coords))]
+            timestamps[timestamp_key] = np.insert(
+                timestamps[timestamp_key], insert_ids[timestamp_key], insertion_timesteps
+            )
 
-                timestamps[timestamp_key] = np.insert(
-                    timestamps[timestamp_key], insert_ids[timestamp_key], timestep
-                )
-                xy_coords[xy_key] = np.insert(
-                    xy_coords[xy_key], insert_ids[timestamp_key], coord, axis=0
-                )
-                labels[label_key] = np.insert(
-                    labels[label_key], insert_ids[timestamp_key], label
-                )
-                polarities[polarity_key] = np.insert(
-                    polarities[polarity_key], insert_ids[timestamp_key], polarity
-                )
+            xy_coords[xy_key] = np.insert(
+                xy_coords[xy_key], insert_ids[timestamp_key], spike_coords, axis=0
+            )
+
+            insertion_labels = [label for _ in range(len(spike_coords))]
+            labels[label_key] = np.insert(
+                labels[label_key], insert_ids[timestamp_key], insertion_labels
+            )
+
+            insertion_polarities = [polarity for _ in range(len(spike_coords))]
+            polarities[polarity_key] = np.insert(
+                polarities[polarity_key], insert_ids[timestamp_key], insertion_polarities
+            )
 
     print(f"\nInjected {total_events_injected} events into the event data\n")
 
