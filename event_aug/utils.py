@@ -71,7 +71,7 @@ def imgs_to_video(
             img = img_arr[i]
 
             if is_grayscale:
-                img = img.astype(np.float32)
+                img = img.astype(np.uint8)
                 img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
         else:
@@ -91,7 +91,7 @@ def imgs_to_video(
     out_vid.release()
 
 
-def array_to_video(arr: np.ndarray, save_path: str, fps: int = None):
+def array_to_video(arr: np.ndarray, save_path: str, fps: int):
 
     """
     Converts an array of image data to a video.
@@ -140,12 +140,12 @@ def video_to_array(
     fps = int(vid.get(cv2.CAP_PROP_FPS))
 
     n_frames = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
-    print(f"No. of frames: {n_frames}, Frame width: {W}, Frame height: {H}, FPS: {fps}")
+    print(f"No. of frames: {n_frames}, Frame width: {W}, Frame height: {H}")
 
     if grayscale:
-        arr = np.zeros((n_frames, H, W))
+        arr = np.zeros((n_frames, H, W), dtype=np.uint8)
     else:
-        arr = np.zeros((n_frames, H, W, 3))
+        arr = np.zeros((n_frames, H, W, 3), dtype=np.uint8)
 
     i = 0
     while True:

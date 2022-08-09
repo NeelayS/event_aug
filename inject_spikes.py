@@ -90,18 +90,16 @@ def inject_event_spikes(
             polarity_key: f[polarity_key][:].copy() for polarity_key in polarity_keys
         }
 
-        if label is None:
-            label = 0
-            print(
-                "\nNo label provided. Using label '0' for all event spikes to be injected"
-            )
+    if label is None:
+        label = 0
+        print("\nNo label provided. Using label '0' for all event spikes to be injected")
 
-        if polarity is None:
-            polarity = 0
-            print(
-                "\nNo polarity provided. Using polarity '0' for all event spikes to be"
-                " injected\n"
-            )
+    if polarity is None:
+        polarity = 0
+        print(
+            "\nNo polarity provided. Using polarity '0' for all event spikes to be"
+            " injected\n"
+        )
 
     assert (spikes_video_path is not None) or (
         spikes_arr is not None
@@ -131,12 +129,9 @@ def inject_event_spikes(
             fps is not None
         ), "fps must be specified if a spikes array is given as input"
 
-    if (np.unique(spikes_arr) != 0).any() or (np.unique(spikes_arr) != 1).any():
-        spikes = np.round(spikes_arr / 255).astype(np.uint8)
-
     total_events_injected = 0
 
-    for n_frame in range(spikes.shape[0]):
+    for n_frame in range(spikes_arr.shape[0]):
 
         if verbose is True:
             print(f"\nProcessing frame {n_frame} of the event spikes video/array")
@@ -144,7 +139,10 @@ def inject_event_spikes(
         timestep = n_frame / fps
         timestep = round(timestep * 1e6)
 
-        spikes_frame = spikes[n_frame]
+        spikes_frame = spikes_arr[n_frame]
+
+        if (np.unique(spikes_frame) > 1).any():
+            spikes_frame = np.round(spikes_frame / 255).astype(np.uint8)
 
         if resize_size is not None:
             spikes_frame = cv2.resize(spikes_frame, resize_size)
@@ -171,23 +169,30 @@ def inject_event_spikes(
                 " frame"
             )
 
+        insert_ids = {key: None for key in timestamps.keys()}
+
+        for timestamp_key in timestamps.keys():
+            insert_ids[timestamp_key] = np.searchsorted(
+                timestamps[timestamp_key], timestep
+            )
+
         for coord in spike_coords:
 
             for timestamp_key, xy_key, label_key, polarity_key, in zip(
                 timestamps.keys(), xy_coords.keys(), labels.keys(), polarities.keys()
             ):
 
-                insert_idx = np.where(timestamps[timestamp_key] <= timestep)[0][-1] + 1
-
                 timestamps[timestamp_key] = np.insert(
-                    timestamps[timestamp_key], insert_idx, timestep
+                    timestamps[timestamp_key], insert_ids[timestamp_key], timestep
                 )
                 xy_coords[xy_key] = np.insert(
-                    xy_coords[xy_key], insert_idx, coord, axis=0
+                    xy_coords[xy_key], insert_ids[timestamp_key], coord, axis=0
                 )
-                labels[label_key] = np.insert(labels[label_key], insert_idx, label)
+                labels[label_key] = np.insert(
+                    labels[label_key], insert_ids[timestamp_key], label
+                )
                 polarities[polarity_key] = np.insert(
-                    polarities[polarity_key], insert_idx, polarity
+                    polarities[polarity_key], insert_ids[timestamp_key], polarity
                 )
 
     print(f"\nInjected {total_events_injected} events into the event data\n")
