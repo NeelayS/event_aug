@@ -1,3 +1,6 @@
+from typing import Tuple
+
+import cv2
 import h5py
 import numpy as np
 
@@ -9,9 +12,15 @@ def inject_event_spikes(
     save_path: str,
     spikes_video_path: str = None,
     spikes_arr: np.ndarray = None,
+    resize_size: Tuple[int, int] = None,
+    crop_size: Tuple[int, int] = None,
     fps: int = None,
     label: int = None,
     polarity: int = None,
+    timestamp_keys: Tuple[str] = None,
+    xy_keys: Tuple[str] = None,
+    label_keys: Tuple[str] = None,
+    polarity_keys: Tuple[str] = None,
     verbose=False,
 ):
 
@@ -28,12 +37,24 @@ def inject_event_spikes(
         Path to the video containing the event spikes data as frames.
     spikes_arr : np.ndarray
         Array containing the event spikes data as frames.
+    resize_size : Tuple[int, int]
+        If specified, the size to reshape the event spikes frames to.
+    crop_size : Tuple[int, int]
+        If specified, the size to crop the event spikes frames to.
     fps : int
         Frame rate to use for the event spikes to be injected.
     label : int
         Label to assign for the event spikes to be injected.
     polarity : int
         Polarity to assign for the event spikes to be injected.
+    timestamp_keys : Tuple[str]
+        Keys to use to index the event timestamp data.
+    xy_keys : Tuple[str]
+        Keys to use to index the event xy coordinates data.
+    label_keys : Tuple[str]
+        Keys to use to index the event label data.
+    polarity_keys : Tuple[str]
+        Keys to use to index the event polarity data.
     verbose : bool
         Whether to print progress messages.
     """
@@ -44,15 +65,21 @@ def inject_event_spikes(
 
         keys = list(f.keys())
 
-        timestamp_keys = [key for key in keys if key.startswith("timestamp")]
-        xy_keys = [key for key in keys if key.startswith("xy")]
-        label_keys = [key for key in keys if key.startswith("label")]
-        polarity_keys = [key for key in keys if key.startswith("polarity")]
+        if timestamp_keys is None:
+            timestamp_keys = [key for key in keys if key.startswith("timestamp")]
+            assert len(timestamp_keys) != 0, "No timestamp data found in event data"
 
-        assert len(timestamp_keys) != 0, "No timestamp data found in event data"
-        assert len(xy_keys) != 0, "No xy coordinate data found in event data"
-        assert len(label_keys) != 0, "No label data found in event data"
-        assert len(polarity_keys) != 0, "No polarity data found in event data"
+        if xy_keys is None:
+            xy_keys = [key for key in keys if key.startswith("xy")]
+            assert len(xy_keys) != 0, "No xy coordinate data found in event data"
+
+        if label_keys is None:
+            label_keys = [key for key in keys if key.startswith("label")]
+            assert len(label_keys) != 0, "No label data found in event data"
+
+        if polarity_keys is None:
+            polarity_keys = [key for key in keys if key.startswith("polarity")]
+            assert len(polarity_keys) != 0, "No polarity data found in event data"
 
         timestamps = {
             timestamp_key: f[timestamp_key][:].copy() for timestamp_key in timestamp_keys
@@ -66,14 +93,14 @@ def inject_event_spikes(
         if label is None:
             label = 0
             print(
-                "No label provided. Using label '0' for all event spikes to be injected"
+                "\nNo label provided. Using label '0' for all event spikes to be injected"
             )
 
         if polarity is None:
             polarity = 0
             print(
-                "No polarity provided. Using polarity '0' for all event spikes to be"
-                " injected"
+                "\nNo polarity provided. Using polarity '0' for all event spikes to be"
+                " injected\n"
             )
 
     assert (spikes_video_path is not None) or (
@@ -96,6 +123,10 @@ def inject_event_spikes(
             )
 
     else:
+        assert spikes_arr.ndim == 3, (
+            "Spikes array must of shape (n_frames, height, width), where each 2D frame"
+            " contains the event spikes data as 0s or 1s"
+        )
         assert (
             fps is not None
         ), "fps must be specified if a spikes array is given as input"
@@ -108,18 +139,36 @@ def inject_event_spikes(
     for n_frame in range(spikes.shape[0]):
 
         if verbose is True:
-            print(f"Processing frame {n_frame} of the event spikes video/array")
+            print(f"\nProcessing frame {n_frame} of the event spikes video/array")
 
         timestep = n_frame / fps
         timestep = round(timestep * 1e6)
 
-        spike_coords = np.argwhere(spikes[n_frame] == 1)
+        spikes_frame = spikes[n_frame]
+
+        if resize_size is not None:
+            spikes_frame = cv2.resize(spikes_frame, resize_size)
+
+        if crop_size is not None:
+            frame_size = spikes_frame.shape
+            assert (
+                frame_size[0] > crop_size[0] and frame_size[1] > crop_size[1]
+            ), "Crop size must be smaller than the frame size"
+
+            start_x = frame_size[1] // 2 - crop_size[1] // 2
+            start_y = frame_size[0] // 2 - crop_size[0] // 2
+
+            spikes_frame = spikes_frame[
+                start_y : start_y + crop_size[0], start_x : start_x + crop_size[1]
+            ]
+
+        spike_coords = np.argwhere(spikes_frame == 1)
         total_events_injected += len(spike_coords)
 
         if verbose is True:
             print(
                 f"Injecting event spikes found at {len(spike_coords)} locations in the"
-                " frame\n"
+                " frame"
             )
 
         for coord in spike_coords:
@@ -141,7 +190,7 @@ def inject_event_spikes(
                     polarities[polarity_key], insert_idx, polarity
                 )
 
-    print(f"Injected {total_events_injected} events into the event data\n")
+    print(f"\nInjected {total_events_injected} events into the event data\n")
 
     if verbose is True:
         print(f"Saving event data with specified event spikes injected to {save_path}\n")
@@ -204,6 +253,20 @@ if __name__ == "__main__":
         help="Polarity to assign for the event spikes to be injected",
     )
     parser.add_argument(
+        "--resize_size",
+        type=int,
+        nargs="+",
+        default=None,
+        help="Reshape size for event spike frames to be injected",
+    )
+    parser.add_argument(
+        "--crop_size",
+        type=int,
+        nargs="+",
+        default=None,
+        help="Crop size for event spike frames to be injected",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         default=None,
@@ -219,5 +282,7 @@ if __name__ == "__main__":
         fps=args.fps,
         label=args.label,
         polarity=args.polarity,
+        resize_size=args.resize_size,
+        crop_size=args.crop_size,
         verbose=args.verbose,
     )
