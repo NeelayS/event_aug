@@ -1,4 +1,5 @@
 import os
+from typing import Tuple, Union
 
 import cv2
 import numpy as np
@@ -90,9 +91,103 @@ def imgs_to_video(
     out_vid.release()
 
 
+def array_to_video(arr: np.ndarray, save_path: str, fps: int = None):
+
+    """
+    Converts an array of image data to a video.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        Array containing the image data.
+    save_path : str
+        Path to the output video file.
+    fps : int
+        Output video frame rate.
+    """
+
+    imgs_to_video(save_path=save_path, img_arr=arr, out_fps=fps)
+
+
+def video_to_array(
+    video_path: str, grayscale: bool = False, return_fps: bool = False
+) -> Union[np.ndarray, Tuple[np.ndarray, int]]:
+
+    """
+    Converts a video to an array of frames data.
+
+    Parameters
+    ----------
+    video_path : str
+        Path to the input video file.
+    grayscale : bool
+        Whether to convert the frames to grayscale.
+    return_fps : bool
+        Whether to return the video frame rate.
+
+    Returns
+    -------
+    arr : np.ndarray
+        Array of frames data.
+    fps : int
+        Video frame rate.
+    """
+
+    vid = cv2.VideoCapture(video_path)
+
+    W, H = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)), int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    fps = int(vid.get(cv2.CAP_PROP_FPS))
+
+    n_frames = int(vid.get(cv2.CAP_PROP_FRAME_COUNT))
+    print(f"No. of frames: {n_frames}, Frame width: {W}, Frame height: {H}, FPS: {fps}")
+
+    if grayscale:
+        arr = np.zeros((n_frames, H, W))
+    else:
+        arr = np.zeros((n_frames, H, W, 3))
+
+    i = 0
+    while True:
+
+        ret, frame = vid.read()
+
+        if ret is False:
+            break
+
+        if grayscale:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        frame = frame.astype(np.uint8)
+        arr[i] = frame
+        i += 1
+
+    vid.release()
+
+    if return_fps:
+        return arr, fps
+
+    return arr
+
+
 def save_video_frames_diffs(
     video_path: str, save_path: str, out_fps: int = None, neg_diff: bool = False
 ):
+
+    """
+    Saves the pixelwise differences between consecutive frames of a video to a video.
+
+    Parameters
+    ----------
+    video_path : str
+        Path to the input video file.
+    save_path : str
+        Path to the output video file.
+    out_fps : int
+        Output video frame rate.
+    neg_diff : bool
+        Whether to consider negative differences.
+    """
 
     vid = cv2.VideoCapture(video_path)
 
