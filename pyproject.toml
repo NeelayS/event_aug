@@ -15,12 +15,16 @@ noise = "^1.2.2"
 torch = "^1.11.0"
 perlin-numpy = {git = "https://github.com/pvigier/perlin-numpy"}
 h5py = "^3.7.0"
+youtube_dl = {version = "^2021.12.17", optional = true}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 pre-commit = "^2.19.0"
 pytest-cov = "^3.0.0"
 ipykernel = "^6.15.1"
+
+[tool.poetry.extras]
+youtube = ["youtube_dl"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
