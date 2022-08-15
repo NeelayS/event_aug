@@ -75,8 +75,18 @@ pip install git+https://github.com/NeelayS/event_aug.git#[youtube]
 
 **TBA**
 
+<!-- To install the basic version of the package: -->
+
 <!-- ```bash
 
 pip install event-aug
+
+``` -->
+
+<!-- To use the YouTube video downloading functionality of the package:
+
+```bash
+
+pip install event-aug[youtube]
 
 ``` -->
