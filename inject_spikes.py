@@ -1,6 +1,7 @@
 if __name__ == "__main__":
 
     import argparse
+
     from event_aug.spike_injection import inject_event_spikes
 
     parser = argparse.ArgumentParser(
