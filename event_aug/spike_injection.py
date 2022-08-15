@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import cv2
 import h5py
@@ -11,7 +11,8 @@ def inject_event_spikes(
     event_data_path: str,
     save_path: str,
     spikes_video_path: str = None,
-    spikes_arr: np.ndarray = None,
+    spikes_arr: Union[np.ndarray, str] = None,
+    spikes_arr_from_file: bool = False,
     resize_size: Tuple[int, int] = None,
     crop_size: Tuple[int, int] = None,
     fps: int = None,
@@ -37,6 +38,8 @@ def inject_event_spikes(
         Path to the video containing the event spikes data as frames.
     spikes_arr : np.ndarray
         Array containing the event spikes data as frames.
+    spikes_arr_from_file : bool
+        Whether to read the spikes video array from a .npy file.
     resize_size : Tuple[int, int]
         If specified, the size to reshape the event spikes frames to.
     crop_size : Tuple[int, int]
@@ -119,6 +122,11 @@ def inject_event_spikes(
                 "No frame rate provided for injection. Using the video's frame rate:"
                 f" {fps}"
             )
+
+    if spikes_arr_from_file is True:
+        assert type(spikes_arr) == str, "Spikes array must be a path to a .npy file"
+        assert spikes_arr.endswith(".npy"), "Spikes array must be a .npy file"
+        spikes_arr = np.load(spikes_arr)
 
     else:
         assert spikes_arr.ndim == 3, (
