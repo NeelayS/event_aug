@@ -60,6 +60,10 @@ def test_delta_intensity_code():
     data = (np.random.rand(10, 32, 32) * 255).astype(np.uint8)
 
     out = delta_intensity_code_video(
-        video_arr=data, threshold=25, use_neg_delta=False, exclude_start=False
+        video_arr=data,
+        threshold=25,
+        use_neg_delta=False,
+        exclude_start=False,
+        return_arr=True,
     )
     assert out.shape == (10, 32, 32)
