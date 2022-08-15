@@ -1,5 +1,7 @@
 import os
 import re
+import subprocess
+from typing import Tuple, Union
 
 import cv2
 import numpy as np
@@ -137,3 +139,46 @@ def save_video_frames_diffs(
 
     vid.release()
     out_vid.release()
+
+
+def download_from_youtube(
+    urls: Union[Tuple[str], str],
+    start_times: Union[Tuple[int], str],
+    end_times: Union[Tuple[int], str],
+    save_dir: str,
+):
+    """
+    Downloads videos from YouTube.
+    """
+
+    if isinstance(urls, str):
+        urls = (urls,)
+
+    if isinstance(start_times, int):
+        start_times = (start_times,)
+        start_times = [int(time) for time in start_times]
+
+    if isinstance(end_times, int):
+        end_times = (end_times,)
+        end_times = [int(time) for time in end_times]
+
+    assert (
+        len(urls) == len(start_times) == len(end_times)
+    ), "Length of urls, start_times and end_times must be equal"
+
+    os.makedirs(save_dir, exist_ok=True)
+
+    for i in range(len(urls)):
+
+        print(f"Downloading video {i + 1} of {len(urls)}")
+
+        try:
+            duration = end_times[i] - start_times[i]
+            command = (
+                f"ffmpeg $(youtube-dl -g '{urls[i]}' | sed 's/.*/-ss {start_times[i]} -i"
+                f" &/') -t {duration} -c copy {save_dir}/{i}.mp4"
+            )
+            subprocess.call(command, shell=True)
+
+        except:
+            raise Exception(f"Error downloading video {i + 1} of {len(urls)}")
