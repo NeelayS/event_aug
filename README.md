@@ -16,20 +16,21 @@
 
 ### Using Poetry (recommended)
 
-Clone the repository and enter working directory:
-
-```bash
-
-git clone https://github.com/NeelayS/event_aug
-cd event_aug
-
-```
 
 If you don't have `Poetry` installed, you can install it with the following command:
 
 ```bash
 
 pip install poetry
+
+```
+
+Clone the repository and enter working directory:
+
+```bash
+
+git clone https://github.com/NeelayS/event_aug
+cd event_aug
 
 ```
 
@@ -61,6 +62,7 @@ poetry install -E youtube
 
 ### Using Pip
 
+
 To install the basic version of the package:
 
 ```bash
@@ -79,6 +81,7 @@ pip install git+https://github.com/NeelayS/event_aug.git#[youtube]
 
 
 ## From PyPI
+
 
 **TBA**
 
