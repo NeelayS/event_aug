@@ -62,6 +62,8 @@ def delta_intensity_code_arr(
     mode: str = "threshold",
     use_neg_delta: bool = True,
     exclude_start: bool = False,
+    save_arr: bool = False,
+    save_name: str = None,
 ) -> Union[np.ndarray, torch.Tensor]:
 
     """
@@ -84,6 +86,10 @@ def delta_intensity_code_arr(
         Whether to consider decreases in intensity as well along with increases for assigning events.
     exclude_start: bool
         Whether to not return the spikes for the first frame which will always be 0 for all pixels.
+    save_arr: bool
+        Whether to save the spikes array to a .npy file.
+    save_name: str
+        Name of the .npy file to save the spikes array to.
 
     Returns
     -------
@@ -104,6 +110,9 @@ def delta_intensity_code_arr(
         "threshold",
         "percent_threshold",
     ], "Mode must be either 'threshold' or 'percent_threshold'"
+
+    if save_arr is True:
+        assert save_name is not None, "save_name must be specified if save_arr is True"
 
     if isinstance(arr, torch.Tensor):
         arr = arr.numpy()
@@ -138,6 +147,9 @@ def delta_intensity_code_arr(
 
     if exclude_start:
         return spikes[1:]
+
+    if save_arr is True:
+        np.save(save_name, spikes)
 
     if torch_inp_arr is True:
         return torch.from_numpy(spikes)
