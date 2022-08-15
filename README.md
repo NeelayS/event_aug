@@ -1,14 +1,20 @@
-# event-aug
+<h1 align="center">EventAug</h1>
+<h3 align="center">A Python package for augmenting event-camera datasets</h3>
 
-A Python package for augmenting event-camera datasets
+<div align='center'>
 
-## Installation
+[![Tests](https://github.com/NeelayS/event_aug/actions/workflows/package-test.yml/badge.svg)](https://github.com/NeelayS/event_aug/actions/workflows/package-test.yml)
+
+</div>
 
 
-### From source (recommended)
+# Installation
 
 
-#### Using Poetry (recommended)
+## From source (recommended)
+
+
+### Using Poetry (recommended)
 
 Clone the repository and enter working directory:
 
@@ -53,7 +59,7 @@ poetry install -E youtube
 ```
 
 
-#### Using Pip
+### Using Pip
 
 To install the basic version of the package:
 
@@ -71,7 +77,8 @@ pip install git+https://github.com/NeelayS/event_aug.git#[youtube]
 
 ```
 
-### From PyPI
+
+## From PyPI
 
 **TBA**
 
