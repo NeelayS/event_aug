@@ -171,7 +171,7 @@ def video_to_array(
 
 
 def save_video_frames_diffs(
-    video_path: str, save_path: str, out_fps: int = None, neg_diff: bool = False
+    video_path: str, save_path: str, out_fps: int = None, neg_diff: bool = True
 ):
 
     """

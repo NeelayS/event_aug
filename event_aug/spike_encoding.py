@@ -152,7 +152,7 @@ def delta_intensity_code_file(
     percent_threshold: int = 10,
     mode: str = "threshold",
     out_fps: int = None,
-    use_neg_delta: bool = False,
+    use_neg_delta: bool = True,
 ) -> None:
 
     """
@@ -246,7 +246,7 @@ def delta_intensity_code_video(
     threshold: int = 15,
     percent_threshold: int = 10,
     mode: str = "threshold",
-    use_neg_delta: bool = False,
+    use_neg_delta: bool = True,
     save_path: str = None,
     out_fps: int = None,
     exclude_start: bool = False,
