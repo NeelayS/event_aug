@@ -1,4 +1,5 @@
 import os
+import re
 
 import cv2
 import numpy as np
@@ -46,13 +47,17 @@ def imgs_to_video(
     if img_dir is not None:
 
         img_list = sorted(os.listdir(img_dir))
+
+        if numbered_imgs is True:
+            img_list = sorted(
+                img_list, key=lambda x: int(re.findall(r"\d+", x)[0])
+            )  # if len(re.findall(r'\d+', x)) > 0 else 0)
+
         n_images = len(img_list)
 
         if height is None or width is None:
             sample_img = cv2.imread(os.path.join(img_dir, img_list[0]))
             height, width = sample_img.shape[:2]
-
-        extension = img_list[0][-4:]
 
     else:
         n_images = img_arr.shape[0]
@@ -74,10 +79,7 @@ def imgs_to_video(
                 img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
         else:
-            if numbered_imgs:
-                img_path = os.path.join(img_dir, str(i) + extension)
-            else:
-                img_path = os.path.join(img_dir, img_list[i])
+            img_path = os.path.join(img_dir, img_list[i])
 
             img = cv2.imread(img_path)
 
