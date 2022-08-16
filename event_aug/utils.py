@@ -97,6 +97,20 @@ def imgs_to_video(
 def save_video_frames_diffs(
     video_path: str, save_path: str, out_fps: int = None, neg_diff: bool = False
 ):
+    """
+    Saves the differences in intensities between video frames as a video.
+
+    Parameters
+    ----------
+    video_path : str
+        Path to the input video.
+    save_path : str
+        Path to save the output video.
+    out_fps : int
+        Output video frame rate.
+    neg_diff : bool
+        Whether to consider negative differences.
+    """
 
     vid = cv2.VideoCapture(video_path)
 
@@ -141,6 +155,50 @@ def save_video_frames_diffs(
     out_vid.release()
 
 
+def resize_video(video_path: str, save_path: str, size: Tuple[int]):
+    """
+    Resizes a video to a given size.
+
+    Parameters
+    ----------
+    video_path : str
+        Path to the input video.
+    save_path : str
+        Path to the output video.
+    size : Tuple[int]
+        Size to resize the video to.
+    """
+
+    assert type(video_path) == str and video_path.endswith(
+        ".mp4"
+    ), "Input video must be in mp4 format"
+    assert type(save_path) == str and save_path.endswith(
+        ".mp4"
+    ), "Output video must be in mp4 format"
+    assert type(size) == tuple and len(size) == 2, "Size must be a tuple of length 2"
+
+    vid = cv2.VideoCapture(video_path)
+    fps = int(vid.get(cv2.CAP_PROP_FPS))
+    out_vid = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, size)
+
+    W, H = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH)), int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    print(f"Original frame width: {W}, Original frame height: {H}")
+    print(f"Resizing to {size[0]}x{size[1]}")
+
+    while True:
+
+        ret, frame = vid.read()
+
+        if ret is False:
+            break
+
+        frame = cv2.resize(frame, size)
+        out_vid.write(frame)
+
+    vid.release()
+    out_vid.release()
+
+
 def download_from_youtube(
     urls: Union[Tuple[str], str],
     start_times: Union[Tuple[int], str],
@@ -149,6 +207,17 @@ def download_from_youtube(
 ):
     """
     Downloads videos from YouTube.
+
+    Parameters
+    ----------
+    urls : Union[Tuple[str], str]
+        YouTube URLs.
+    start_times : Union[Tuple[int], str]
+        Start times to trim the videos.
+    end_times : Union[Tuple[int], str]
+        End times to trim the videos.
+    save_dir : str
+        Directory to save the videos to.
     """
 
     if isinstance(urls, str):
