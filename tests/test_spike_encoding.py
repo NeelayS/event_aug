@@ -65,5 +65,6 @@ def test_delta_intensity_code():
         use_neg_delta=False,
         exclude_start=False,
         return_arr=True,
+        save_video=False,
     )
     assert out.shape == (10, 32, 32)

@@ -159,7 +159,9 @@ def inject_event_spikes(
             spikes_frame = np.round(spikes_frame / 255).astype(np.uint8)
 
         if resize_size is not None:
-            spikes_frame = cv2.resize(spikes_frame, resize_size).astype(np.uint8)
+            spikes_frame = cv2.resize(
+                spikes_frame, resize_size, interpolation=cv2.INTER_NEAREST
+            ).astype(np.uint8)
 
         if crop_size is not None:
             frame_size = spikes_frame.shape

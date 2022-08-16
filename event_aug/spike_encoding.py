@@ -156,9 +156,9 @@ def delta_intensity_code_arr(
 
     for i in range(1, arr.shape[0]):
 
-        prev_frame, curr_frame = np.int16(arr[i - 1]), np.int16(
+        prev_frame, curr_frame = np.float32(arr[i - 1]), np.float32(
             arr[i]
-        )  # np.float32(arr[i - 1]), np.float32(arr[i])
+        )  # np.int16(arr[i - 1]), np.int16(arr[i])
 
         if multi_channel:
             curr_frame = cv2.cvtColor(curr_frame, cv2.COLOR_RGB2GRAY)
@@ -197,6 +197,7 @@ def delta_intensity_code_file(
     mode: str = "threshold",
     out_fps: int = None,
     use_neg_delta: bool = True,
+    exclude_start: bool = False,
     return_arr: bool = False,
     save_video: bool = True,
     video_save_path: str = None,
@@ -224,6 +225,8 @@ def delta_intensity_code_file(
         Output video frame rate.
     use_neg_delta: bool
         Whether to consider decreases in intensity as well along with increases for assigning events.
+    exclude_start: bool
+        Whether to not return the spikes for the first frame which will always be 1 for all pixels.
     return_arr: bool
         Whether to return an array containing frame-wise spikes.
     save_video: bool
@@ -293,6 +296,11 @@ def delta_intensity_code_file(
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         frame = frame.astype(np.int16)  # frame.astype(np.float32)
 
+        if exclude_start and i == 0:
+            prev_frame = frame
+            i += 1
+            continue
+
         delta = frame - prev_frame
         prev_frame = frame
 
@@ -338,7 +346,7 @@ def delta_intensity_code_video(
     mode: str = "threshold",
     use_neg_delta: bool = True,
     out_fps: int = None,
-    exclude_start: bool = False,
+    exclude_start: bool = True,
     return_arr: bool = False,
     save_video: bool = True,
     video_save_path: str = None,
@@ -396,6 +404,7 @@ def delta_intensity_code_video(
             mode=mode,
             out_fps=out_fps,
             use_neg_delta=use_neg_delta,
+            exclude_start=exclude_start,
             return_arr=return_arr,
             save_video=save_video,
             video_save_path=video_save_path,
@@ -406,7 +415,7 @@ def delta_intensity_code_video(
 
     else:
         spikes = delta_intensity_code_arr(
-            video_arr=video_arr,
+            arr=video_arr,
             threshold=threshold,
             percent_threshold=percent_threshold,
             mode=mode,
