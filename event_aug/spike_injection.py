@@ -13,6 +13,7 @@ def inject_event_spikes(
     spikes_video_path: str = None,
     spikes_arr: Union[np.ndarray, str] = None,
     spikes_arr_from_file: bool = False,
+    memory_map: bool = False,
     resize_size: Tuple[int, int] = None,
     crop_size: Tuple[int, int] = None,
     fps: int = None,
@@ -37,9 +38,11 @@ def inject_event_spikes(
     spikes_video_path : str
         Path to the video containing the event spikes data as frames.
     spikes_arr : np.ndarray
-        Array containing the event spikes data as frames.
+        NumPy Array containing the event spikes data as frames.
     spikes_arr_from_file : bool
         Whether to read the spikes video array from a .npy file.
+    memory_map : bool
+        Whether to use memory mapping to read the spikes video array.
     resize_size : Tuple[int, int]
         If specified, the size to reshape the event spikes frames to.
     crop_size : Tuple[int, int]
@@ -126,16 +129,19 @@ def inject_event_spikes(
     if spikes_arr_from_file is True:
         assert type(spikes_arr) == str, "Spikes array must be a path to a .npy file"
         assert spikes_arr.endswith(".npy"), "Spikes array must be a .npy file"
-        spikes_arr = np.load(spikes_arr)
 
-    else:
-        assert spikes_arr.ndim == 3, (
-            "Spikes array must of shape (n_frames, height, width), where each 2D frame"
-            " contains the event spikes data as 0s or 1s"
-        )
-        assert (
-            fps is not None
-        ), "fps must be specified if a spikes array is given as input"
+        if memory_map is True:
+            spikes_arr = np.load(spikes_arr, mmap_mode="r")
+        else:
+            spikes_arr = np.load(spikes_arr)
+
+        spikes_arr = spikes_arr.astype("bool")
+
+    assert spikes_arr.ndim == 3, (
+        "Spikes array must of shape (n_frames, height, width), where each 2D frame"
+        " contains the event spikes data as 0s or 1s"
+    )
+    assert fps is not None, "fps must be specified if a spikes array is given as input"
 
     total_events_injected = 0
 
@@ -147,13 +153,13 @@ def inject_event_spikes(
         timestep = n_frame / fps
         timestep = round(timestep * 1e6)
 
-        spikes_frame = spikes_arr[n_frame]
+        spikes_frame = spikes_arr[n_frame].astype(np.uint8)
 
         if (np.unique(spikes_frame) > 1).any():
             spikes_frame = np.round(spikes_frame / 255).astype(np.uint8)
 
         if resize_size is not None:
-            spikes_frame = cv2.resize(spikes_frame, resize_size)
+            spikes_frame = cv2.resize(spikes_frame, resize_size).astype(np.uint8)
 
         if crop_size is not None:
             frame_size = spikes_frame.shape
