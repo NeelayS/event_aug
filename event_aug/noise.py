@@ -27,7 +27,7 @@ def shift_range(arr: np.ndarray):
     max_arr = np.max(arr)
     min_arr = np.min(arr)
     arr = (arr - min_arr) / (max_arr - min_arr)
-    # arr = arr * 255
+    arr = arr * 255
 
     return arr
 
@@ -163,7 +163,11 @@ def gen_perlin_3d(
     tileable: Tuple[bool, bool, bool] = (True, False, False),
     reshape_size: Tuple[int, int] = None,
     crop_size: Tuple[int, int] = None,
-    save_path: str = None,
+    return_arr: bool = True,
+    save_arr: bool = False,
+    arr_save_path: str = None,
+    save_video: bool = False,
+    video_save_path: str = None,
     out_fps: int = 25,
 ) -> np.ndarray:
 
@@ -183,8 +187,18 @@ def gen_perlin_3d(
         Size to reshape the array along spatial dimensions to using interpolation.
     crop_size: Tuple[int, int]
         Size to crop the array along spatial dimensions to.
-    save_path: str
-        Path (.mp4) to save the generated 3D noise as a video.
+    return_arr: bool
+        If the noise array should be returned.
+    save_arr: bool
+        If the generated array should be saved to an npy file.
+    arr_save_path: str
+        Path (.npy) to save the generated array to.
+    save_video: bool
+        If the generated array should be saved as a video to a .mp4 file.
+    video_save_path: str
+        Path (.mp4) to save the generated array as a video to.
+    out_fps: int
+        FPS of the output video.
 
     Returns
     -------
@@ -195,10 +209,22 @@ def gen_perlin_3d(
     noise = generate_perlin_noise_3d(shape, res, tileable)
     noise = postprocess_3d_noise(noise, reshape_size, crop_size)
 
-    if save_path is not None:
-        imgs_to_video(save_path, img_arr=noise * 255, out_fps=out_fps)
+    if save_arr:
+        assert arr_save_path is not None
+        assert arr_save_path.endswith(".npy")
 
-    return noise
+        np.save(arr_save_path, noise)
+
+    if save_video:
+        assert video_save_path is not None
+        assert video_save_path.endswith(".mp4")
+
+        imgs_to_video(video_save_path, img_arr=noise, out_fps=out_fps)
+
+    if return_arr:
+        return noise
+
+    return None
 
 
 def gen_fractal_3d(
@@ -210,7 +236,11 @@ def gen_fractal_3d(
     lacunarity: int = 2,
     reshape_size: Tuple[int, int] = None,
     crop_size: Tuple[int, int] = None,
-    save_path: str = None,
+    return_arr: bool = True,
+    save_arr: bool = False,
+    arr_save_path: str = None,
+    save_video: bool = False,
+    video_save_path: str = None,
     out_fps: int = 25,
 ) -> np.ndarray:
 
@@ -237,8 +267,18 @@ def gen_fractal_3d(
         Size to reshape the array along spatial dimensions to using interpolation.
     crop_size: Tuple[int, int]
         Size to crop the array along spatial dimensions to.
-    save_path: str
-        Path (.mp4) to save the generated 3D noise as a video.
+    return_arr: bool
+        If the noise array should be returned.
+    save_arr: bool
+        If the generated array should be saved to an npy file.
+    arr_save_path: str
+        Path (.npy) to save the generated array to.
+    save_video: bool
+        If the generated array should be saved as a video to a .mp4 file.
+    video_save_path: str
+        Path (.mp4) to save the generated array as a video to.
+    out_fps: int
+        FPS of the output video.
 
     Returns
     -------
@@ -251,7 +291,19 @@ def gen_fractal_3d(
     )
     noise = postprocess_3d_noise(noise, reshape_size, crop_size)
 
-    if save_path is not None:
-        imgs_to_video(save_path, img_arr=noise * 255, out_fps=out_fps)
+    if save_arr:
+        assert arr_save_path is not None
+        assert arr_save_path.endswith(".npy")
 
-    return noise
+        np.save(arr_save_path, noise)
+
+    if save_video:
+        assert video_save_path is not None
+        assert video_save_path.endswith(".mp4")
+
+        imgs_to_video(video_save_path, img_arr=noise, out_fps=out_fps)
+
+    if return_arr:
+        return noise
+
+    return None
