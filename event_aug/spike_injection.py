@@ -176,7 +176,7 @@ def inject_event_spikes(
                 start_y : start_y + crop_size[0], start_x : start_x + crop_size[1]
             ]
 
-        spike_coords = np.argwhere(spikes_frame == 1)
+        spike_coords = np.argwhere(spikes_frame == 1)[:, ::-1]
         total_events_injected += len(spike_coords)
 
         if verbose is True:
