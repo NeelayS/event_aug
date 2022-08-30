@@ -130,3 +130,5 @@ dmypy.json
 
 # Random
 tinker.ipynb
+**/tmp/
+t.py

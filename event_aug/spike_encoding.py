@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 import torch
 
+from event_aug.utils import array_to_video
+
 
 def rate_code(
     data: Union[np.ndarray, torch.Tensor], n_steps: int = 1, gain: int = 1
@@ -64,7 +66,10 @@ def delta_intensity_code_arr(
     exclude_start: bool = False,
     return_arr: bool = True,
     save_arr: bool = False,
-    save_path: str = None,
+    arr_save_path: str = None,
+    save_video: bool = False,
+    video_save_path: str = None,
+    video_fps: int = 25,
 ) -> Union[np.ndarray, torch.Tensor]:
 
     """
@@ -91,8 +96,14 @@ def delta_intensity_code_arr(
         Whether to return the spikes array.
     save_arr: bool
         Whether to save the spikes array to a .npy file.
-    save_path: str
+    arr_save_path: str
         Name of the .npy file to save the spikes array to (excluding extension).
+    save_video: bool
+        Whether to save the spikes as a video (.mp4).
+    video_save_path: str
+        Name of the .mp4 file to save the spikes video to.
+    video_fps: int
+        Frames per second of the video.
 
     Returns
     -------
@@ -115,7 +126,20 @@ def delta_intensity_code_arr(
     ], "Mode must be either 'threshold' or 'percent_threshold'"
 
     if save_arr is True:
-        assert save_path is not None, "save_path must be specified if save_arr is True"
+        assert (
+            arr_save_path is not None
+        ), "save_path must be specified if save_arr is True"
+        assert arr_save_path.endswith(
+            ".npy"
+        ), "arr_save_path must be without and extension or end with .npy"
+
+    if save_video is True:
+        assert (
+            video_save_path is not None
+        ), "video_save_path must be specified if save_video is True"
+        assert video_save_path.endswith(
+            ".mp4"
+        ), "video_save_path must be without and extension or end with .mp4"
 
     if isinstance(arr, torch.Tensor):
         arr = arr.numpy()
@@ -128,11 +152,13 @@ def delta_intensity_code_arr(
     T = arr.shape[0]
     H, W = arr.shape[1], arr.shape[2]
 
-    spikes = np.zeros((T, H, W))
+    spikes = np.zeros((T, H, W), dtype="bool")
 
     for i in range(1, arr.shape[0]):
 
-        prev_frame, curr_frame = np.float32(arr[i - 1]), np.float32(arr[i])
+        prev_frame, curr_frame = np.float32(arr[i - 1]), np.float32(
+            arr[i]
+        )  # np.int16(arr[i - 1]), np.int16(arr[i])
 
         if multi_channel:
             curr_frame = cv2.cvtColor(curr_frame, cv2.COLOR_RGB2GRAY)
@@ -152,7 +178,10 @@ def delta_intensity_code_arr(
         return spikes[1:]
 
     if save_arr is True:
-        np.save(save_path, spikes)
+        np.save(arr_save_path, spikes)
+
+    if save_video is True:
+        array_to_video(spikes.astype(np.uint8) * 255, video_save_path, fps=video_fps)
 
     if return_arr is True:
         if torch_inp_arr is True:
@@ -163,14 +192,17 @@ def delta_intensity_code_arr(
 
 def delta_intensity_code_file(
     video_path: str,
-    save_path: str,
     threshold: int = 15,
     percent_threshold: int = 10,
     mode: str = "threshold",
     out_fps: int = None,
-    use_neg_delta: bool = False,
+    use_neg_delta: bool = True,
+    exclude_start: bool = False,
     return_arr: bool = False,
+    save_video: bool = True,
+    video_save_path: str = None,
     save_arr: bool = False,
+    arr_save_path: str = None,
 ) -> None:
 
     """
@@ -181,8 +213,6 @@ def delta_intensity_code_file(
     ----------
     video_path: str
         Path to the input video file.
-    save_path: str
-        Path to save the output video file to.
     threshold: int
         Threshold for the difference in intensities of pixels in consecutive frames
         for assigning events.
@@ -195,16 +225,31 @@ def delta_intensity_code_file(
         Output video frame rate.
     use_neg_delta: bool
         Whether to consider decreases in intensity as well along with increases for assigning events.
+    exclude_start: bool
+        Whether to not return the spikes for the first frame which will always be 1 for all pixels.
     return_arr: bool
         Whether to return an array containing frame-wise spikes.
+    save_video: bool
+        Whether to save the frame-wise spikes as a video (.mp4).
+    video_save_path: str
+        Name of the .mp4 file to save the spikes video to.
     save_arr: bool
         Whether to save the spikes array to a .npy file.
+    arr_save_path: str
+        Name of the .npy file to save the spikes array to (excluding extension).
     """
 
-    if save_arr is False:
-        assert save_path.endswith(".mp4"), "Output video file must be .mp4"
-    else:
-        assert save_path.endswith(".npy"), "Output spikes file must be .npy"
+    if save_video is True:
+        assert (
+            video_save_path is not None
+        ), "video_save_path must be specified if save_video is True"
+        assert video_save_path.endswith(".mp4"), "Output video file must be .mp4"
+
+    if save_arr is True:
+        assert (
+            arr_save_path is not None
+        ), "save_path must be specified if save_arr is True"
+        assert arr_save_path.endswith(".npy"), "Output spikes file must be .npy"
 
     assert (
         threshold is not None or percent_threshold is not None
@@ -231,11 +276,15 @@ def delta_intensity_code_file(
         f" Number of frames: {n_frames}"
     )
 
-    if return_arr is True:
-        spikes_arr = np.zeros((n_frames, H, W))
+    if return_arr is True or save_arr is True:
+        spikes_arr = np.zeros((n_frames, H, W), dtype="bool")
 
-    out_vid = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), out_fps, (W, H))
-    prev_frame = np.ones((H, W)) * 255
+    if save_video is True:
+        out_vid = cv2.VideoWriter(
+            video_save_path, cv2.VideoWriter_fourcc(*"mp4v"), out_fps, (W, H)
+        )
+
+    prev_frame = np.ones((H, W), dtype=np.int16) * 255
 
     i = 0
     while True:
@@ -245,7 +294,12 @@ def delta_intensity_code_file(
             break
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        frame = frame.astype(np.float32)
+        frame = frame.astype(np.int16)  # frame.astype(np.float32)
+
+        if exclude_start and i == 0:
+            prev_frame = frame
+            i += 1
+            continue
 
         delta = frame - prev_frame
         prev_frame = frame
@@ -263,19 +317,25 @@ def delta_intensity_code_file(
 
         delta = delta.astype(np.uint8)
 
-        if return_arr is True:
-            spikes_arr[i] = delta / 255
+        if return_arr is True or save_arr is True:
+            spikes_arr[i] = (delta == 255).astype("bool")
 
-        delta = cv2.cvtColor(delta, cv2.COLOR_GRAY2BGR)
-        out_vid.write(delta)
+        if save_video is True:
+            delta = cv2.cvtColor(delta, cv2.COLOR_GRAY2BGR)
+            out_vid.write(delta)
 
         i += 1
 
     vid.release()
-    out_vid.release()
+
+    if save_video is True:
+        out_vid.release()
 
     if save_arr is True:
-        np.save(save_path, spikes_arr)
+        np.save(arr_save_path, spikes_arr)
+
+    if return_arr is True:
+        return spikes_arr
 
 
 def delta_intensity_code_video(
@@ -284,12 +344,14 @@ def delta_intensity_code_video(
     threshold: int = 15,
     percent_threshold: int = 10,
     mode: str = "threshold",
-    use_neg_delta: bool = False,
-    save_path: str = None,
+    use_neg_delta: bool = True,
     out_fps: int = None,
-    exclude_start: bool = False,
+    exclude_start: bool = True,
     return_arr: bool = False,
+    save_video: bool = True,
+    video_save_path: str = None,
     save_arr: bool = False,
+    arr_save_path: str = None,
 ) -> Union[np.ndarray, torch.Tensor, None]:
 
     """
@@ -313,16 +375,20 @@ def delta_intensity_code_video(
         Whether to use 'threshold' or 'percent_threshold'".
     use_neg_delta: bool
         Whether to consider decreases in intensity as well along with increases for assigning events.
-    save_path: str
-        Path to save the output video file to (required if input video is a file).
     out_fps: int
         Output video frame rate (required if input video is a file).
     exclude_start: bool
         Whether to not return the spikes for the first frame which will always be 0 for all pixels (required if input video is a file).
     return_arr: bool
         Whether to return an array containing frame-wise spikes.
+    save_video: bool
+        Whether to save the frame-wise spikes as a video (.mp4).
+    video_save_path: str
+        Name of the .mp4 file to save the spikes video to.
     save_arr: bool
         Whether to save the spikes array to a .npy file.
+    arr_save_path: str
+        Name of the .npy file to save the spikes array to (excluding extension).
     """
 
     assert (
@@ -330,32 +396,36 @@ def delta_intensity_code_video(
     ), "Either video_path or video_arr must be provided"
 
     if video_path is not None:
-        assert (
-            save_path is not None
-        ), "save_path must be provided if video_path is provided"
 
-        delta_intensity_code_file(
-            video_path,
-            save_path,
-            threshold,
-            percent_threshold,
-            mode,
-            out_fps,
-            use_neg_delta,
-            return_arr,
-            save_arr,
+        spikes = delta_intensity_code_file(
+            video_path=video_path,
+            threshold=threshold,
+            percent_threshold=percent_threshold,
+            mode=mode,
+            out_fps=out_fps,
+            use_neg_delta=use_neg_delta,
+            exclude_start=exclude_start,
+            return_arr=return_arr,
+            save_video=save_video,
+            video_save_path=video_save_path,
+            save_arr=save_arr,
+            arr_save_path=arr_save_path,
         )
+        return spikes
 
     else:
         spikes = delta_intensity_code_arr(
-            video_arr,
-            threshold,
-            percent_threshold,
-            mode,
-            use_neg_delta,
-            exclude_start,
-            return_arr,
-            save_arr,
-            save_path,
+            arr=video_arr,
+            threshold=threshold,
+            percent_threshold=percent_threshold,
+            mode=mode,
+            use_neg_delta=use_neg_delta,
+            exclude_start=exclude_start,
+            return_arr=return_arr,
+            save_arr=save_arr,
+            arr_save_path=arr_save_path,
+            save_video=save_video,
+            video_save_path=video_save_path,
+            video_fps=out_fps,
         )
         return spikes

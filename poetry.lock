@@ -174,6 +174,17 @@ graphite = ["lz4 (>=1.7.4.2)"]
 all = ["xattr", "unicodedata2 (>=14.0.0)", "munkres", "brotli (>=1.0.1)", "scipy", "brotlicffi (>=0.8.0)", "uharfbuzz (>=0.23.0)", "skia-pathops (>=0.5.0)", "sympy", "matplotlib", "lz4 (>=1.7.4.2)", "zopfli (>=0.1.4)", "lxml (>=4.0,<5)", "fs (>=2.2.0,<3)"]
 
 [[package]]
+name = "h5py"
+version = "3.7.0"
+description = "Read and write HDF5 files from Python"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+numpy = ">=1.14.5"
+
+[[package]]
 name = "identify"
 version = "2.5.3"
 description = "File identification library for Python"
@@ -837,7 +848,7 @@ youtube = ["youtube_dl"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "af4752845f46026abee08b56dbbc893fe379d99fe0711a856a77ffb0ecb2d171"
+content-hash = "c6e020b36e40d17b960f651cc82872f1abba8f709f3b7fcf1e1cb5d675ae6848"
 
 [metadata.files]
 appnope = [
@@ -943,6 +954,7 @@ entrypoints = [
 executing = []
 filelock = []
 fonttools = []
+h5py = []
 identify = []
 ipykernel = []
 ipython = [
