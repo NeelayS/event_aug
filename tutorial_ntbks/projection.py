@@ -65,10 +65,10 @@ def projection(
     fps=25,
     camera_height=260,
     camera_width=346,
+    augmentation_label=2,
+    n_cameras=1,
+    distinguish_polarity=False,
 ):
-
-    n_cameras = 1  # 2
-    event_distinguish_polarity = False
 
     dvs_cam_height = [np.uint32(camera_height) for i in range(n_cameras)]
     dvs_cam_width = [np.uint32(camera_width) for i in range(n_cameras)]
@@ -282,21 +282,22 @@ def projection(
                 while event[i][f"timestamp_{i}"] < pose_midway:
                     xy_int = np.rint(event[i][f"xy_undistorted_{i}"]).astype("int32")
 
-                    if event[i][f"polarity_{i}"]:
-                        pos[xy_int[1], xy_int[0]] += 1
-                    else:
-                        neg[xy_int[1], xy_int[0]] += 1
-
-                    if event_distinguish_polarity:
-                        if event[i][f"polarity_{i}"]:
-                            image[xy_int[1], xy_int[0]] = WHITE  # RED
-                        else:
-                            image[xy_int[1], xy_int[0]] = WHITE  # GREEN
-                    else:
-                        image[xy_int[1], xy_int[0]] = WHITE  # GREEN
-
                     # get event label
-                    # label = event[i][f"label_{i}"]
+                    label = event[i][f"label_{i}"]
+
+                    if label != augmentation_label:
+                        if event[i][f"polarity_{i}"]:
+                            pos[xy_int[1], xy_int[0]] += 1
+                        else:
+                            neg[xy_int[1], xy_int[0]] += 1
+
+                    if distinguish_polarity:
+                        if event[i][f"polarity_{i}"]:
+                            image[xy_int[1], xy_int[0]] = BLUE
+                        else:
+                            image[xy_int[1], xy_int[0]] = GREEN
+                    else:
+                        image[xy_int[1], xy_int[0]] = WHITE
 
                     try:
                         event[i] = get_next_event(events_iter[i], i)
@@ -310,7 +311,8 @@ def projection(
 
                     mask = prop_masks[i][prop_name].astype("bool")
                     image[mask] = GRAY
-                    if event_distinguish_polarity:
+
+                    if distinguish_polarity:
                         mask_neg = neg > pos
                         image[(mask_neg & mask)] = BLUE
                         mask_pos = pos > neg
