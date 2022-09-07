@@ -80,10 +80,10 @@ pip install git+https://github.com/NeelayS/event_aug.git#[youtube]
 ```
 
 
-## From PyPI
+<!-- ## From PyPI
 
 
-**TBA**
+**TBA** -->
 
 <!-- To install the basic version of the package: -->
 
