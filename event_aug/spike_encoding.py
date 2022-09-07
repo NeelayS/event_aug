@@ -59,6 +59,7 @@ def rate_code(
 
 def delta_intensity_code_arr(
     arr: Union[np.ndarray, torch.Tensor],
+    arr_from_file: bool = False,
     threshold: int = 15,
     percent_threshold: int = 10,
     mode: str = "threshold",
@@ -70,6 +71,7 @@ def delta_intensity_code_arr(
     save_video: bool = False,
     video_save_path: str = None,
     video_fps: int = 25,
+    memory_map: bool = True,
 ) -> Union[np.ndarray, torch.Tensor]:
 
     """
@@ -78,8 +80,11 @@ def delta_intensity_code_arr(
 
     Parameters
     ----------
-    arr: np.ndarray or torch.Tensor
+    arr: np.ndarray or torch.Tensor or str
         Array containing the video data (frames). Should be of shape (T x H x W) or (T x H x W x C).
+        If a string is passed, the array is read from a .npy file.
+    arr_from_file: bool
+        Whether to read the video array from a .npy file.
     threshold: int
         Threshold for the difference in intensities of pixels in consecutive frames
         for assigning events.
@@ -104,12 +109,23 @@ def delta_intensity_code_arr(
         Name of the .mp4 file to save the spikes video to.
     video_fps: int
         Frames per second of the video.
+    memory_map : bool
+        Whether to use memory mapping to read the spikes video array.
 
     Returns
     -------
     np.ndarray or torch.Tensor
         Array containing the spikes.
     """
+
+    if arr_from_file is True:
+        assert type(arr) == str, "Spikes array must be a path to a .npy file"
+        assert arr.endswith(".npy"), "Spikes array must be a .npy file"
+
+        if memory_map is True:
+            arr = np.load(arr, mmap_mode="r")
+        else:
+            arr = np.load(arr)
 
     assert (
         len(arr.shape) == 3 or len(arr.shape) == 4

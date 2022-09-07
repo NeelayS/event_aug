@@ -13,7 +13,7 @@ def inject_event_spikes(
     spikes_video_path: str = None,
     spikes_arr: Union[np.ndarray, str] = None,
     spikes_arr_from_file: bool = False,
-    memory_map: bool = False,
+    memory_map: bool = True,
     resize_size: Tuple[int, int] = None,
     crop_size: Tuple[int, int] = None,
     fps: int = None,
@@ -23,6 +23,7 @@ def inject_event_spikes(
     xy_keys: Tuple[str] = None,
     label_keys: Tuple[str] = None,
     polarity_keys: Tuple[str] = None,
+    repeat_times: int = 0,
     verbose=False,
 ):
 
@@ -145,78 +146,82 @@ def inject_event_spikes(
 
     total_events_injected = 0
 
-    for n_frame in range(spikes_arr.shape[0]):
+    for iteration in range(repeat_times + 1):
+        completed_frames = iteration * spikes_arr.shape[0]
 
-        if verbose is True:
-            print(f"\nProcessing frame {n_frame} of the event spikes video/array")
+        for n_frame in range(spikes_arr.shape[0]):
 
-        timestep = n_frame / fps
-        timestep = round(timestep * 1e6)
+            if verbose is True:
+                print(f"\nProcessing frame {n_frame} of the event spikes video/array")
 
-        spikes_frame = spikes_arr[n_frame].astype(np.uint8)
+            timestep = (completed_frames + n_frame) / fps
+            timestep = round(timestep * 1e6)
 
-        if (np.unique(spikes_frame) > 1).any():
-            spikes_frame = np.round(spikes_frame / 255).astype(np.uint8)
+            spikes_frame = spikes_arr[n_frame].astype(np.uint8)
 
-        if resize_size is not None:
-            spikes_frame = cv2.resize(
-                spikes_frame, resize_size, interpolation=cv2.INTER_NEAREST
-            ).astype(np.uint8)
+            if (np.unique(spikes_frame) > 1).any():
+                spikes_frame = np.round(spikes_frame / 255).astype(np.uint8)
 
-        if crop_size is not None:
-            frame_size = spikes_frame.shape
-            assert (
-                frame_size[0] > crop_size[0] and frame_size[1] > crop_size[1]
-            ), "Crop size must be smaller than the frame size"
+            if resize_size is not None:
+                spikes_frame = cv2.resize(
+                    spikes_frame, resize_size, interpolation=cv2.INTER_NEAREST
+                ).astype(np.uint8)
 
-            start_x = frame_size[1] // 2 - crop_size[1] // 2
-            start_y = frame_size[0] // 2 - crop_size[0] // 2
+            if crop_size is not None:
+                frame_size = spikes_frame.shape
+                assert (
+                    frame_size[0] > crop_size[0] and frame_size[1] > crop_size[1]
+                ), "Crop size must be smaller than the frame size"
 
-            spikes_frame = spikes_frame[
-                start_y : start_y + crop_size[0], start_x : start_x + crop_size[1]
-            ]
+                start_x = frame_size[1] // 2 - crop_size[1] // 2
+                start_y = frame_size[0] // 2 - crop_size[0] // 2
 
-        spike_coords = np.argwhere(spikes_frame == 1)[:, ::-1]
-        total_events_injected += len(spike_coords)
+                spikes_frame = spikes_frame[
+                    start_y : start_y + crop_size[0], start_x : start_x + crop_size[1]
+                ]
 
-        if verbose is True:
-            print(
-                f"Injecting event spikes found at {len(spike_coords)} locations in the"
-                " frame"
-            )
+            spike_coords = np.argwhere(spikes_frame == 1)[:, ::-1]
+            total_events_injected += len(spike_coords)
 
-        insert_ids = {key: None for key in timestamps.keys()}
+            if verbose is True:
+                print(
+                    f"Injecting event spikes found at {len(spike_coords)} locations in"
+                    " the frame"
+                )
 
-        for timestamp_key in timestamps.keys():
-            insert_ids[timestamp_key] = np.searchsorted(
-                timestamps[timestamp_key], timestep
-            )
+            insert_ids = {key: None for key in timestamps.keys()}
 
-        for (
-            timestamp_key,
-            xy_key,
-            label_key,
-            polarity_key,
-        ) in zip(timestamps.keys(), xy_coords.keys(), labels.keys(), polarities.keys()):
+            for timestamp_key in timestamps.keys():
+                insert_ids[timestamp_key] = np.searchsorted(
+                    timestamps[timestamp_key], timestep
+                )
 
-            insertion_timesteps = [timestep for _ in range(len(spike_coords))]
-            timestamps[timestamp_key] = np.insert(
-                timestamps[timestamp_key], insert_ids[timestamp_key], insertion_timesteps
-            )
+            for timestamp_key, xy_key, label_key, polarity_key, in zip(
+                timestamps.keys(), xy_coords.keys(), labels.keys(), polarities.keys()
+            ):
 
-            xy_coords[xy_key] = np.insert(
-                xy_coords[xy_key], insert_ids[timestamp_key], spike_coords, axis=0
-            )
+                insertion_timesteps = [timestep for _ in range(len(spike_coords))]
+                timestamps[timestamp_key] = np.insert(
+                    timestamps[timestamp_key],
+                    insert_ids[timestamp_key],
+                    insertion_timesteps,
+                )
 
-            insertion_labels = [label for _ in range(len(spike_coords))]
-            labels[label_key] = np.insert(
-                labels[label_key], insert_ids[timestamp_key], insertion_labels
-            )
+                xy_coords[xy_key] = np.insert(
+                    xy_coords[xy_key], insert_ids[timestamp_key], spike_coords, axis=0
+                )
 
-            insertion_polarities = [polarity for _ in range(len(spike_coords))]
-            polarities[polarity_key] = np.insert(
-                polarities[polarity_key], insert_ids[timestamp_key], insertion_polarities
-            )
+                insertion_labels = [label for _ in range(len(spike_coords))]
+                labels[label_key] = np.insert(
+                    labels[label_key], insert_ids[timestamp_key], insertion_labels
+                )
+
+                insertion_polarities = [polarity for _ in range(len(spike_coords))]
+                polarities[polarity_key] = np.insert(
+                    polarities[polarity_key],
+                    insert_ids[timestamp_key],
+                    insertion_polarities,
+                )
 
     print(f"\nInjected {total_events_injected} events into the event data\n")
 
