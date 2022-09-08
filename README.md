@@ -100,3 +100,8 @@ pip install event-aug
 pip install event-aug[youtube]
 
 ``` -->
+
+
+# Usage
+
+Please refer to the `tutorial_ntbks` folder for usage examples. It contains two IPython notebooks which demonstrate how the package can be used to augment event-camera datasets using spike-encoded (custom) videos and Perlin noise.
