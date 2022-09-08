@@ -65,7 +65,7 @@ def projection(
     fps=25,
     camera_height=260,
     camera_width=346,
-    augmentation_label=2,
+    augmentation_label=-1,
     n_cameras=1,
     distinguish_polarity=False,
 ):
