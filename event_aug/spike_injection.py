@@ -23,7 +23,7 @@ def inject_event_spikes(
     xy_keys: Tuple[str] = None,
     label_keys: Tuple[str] = None,
     polarity_keys: Tuple[str] = None,
-    repeat_times: int = 0,
+    iterations: int = 1,
     verbose=False,
 ):
 
@@ -62,6 +62,8 @@ def inject_event_spikes(
         Keys to use to index the event label data.
     polarity_keys : Tuple[str]
         Keys to use to index the event polarity data.
+    iterations : int
+        Number of times to inject event spikes.
     verbose : bool
         Whether to print progress messages.
     """
@@ -146,7 +148,10 @@ def inject_event_spikes(
 
     total_events_injected = 0
 
-    for iteration in range(repeat_times + 1):
+    for iteration in range(iterations):
+
+        print(f"\nIteration {iteration + 1} of {iterations}")
+
         completed_frames = iteration * spikes_arr.shape[0]
 
         for n_frame in range(spikes_arr.shape[0]):
