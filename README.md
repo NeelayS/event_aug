@@ -5,6 +5,8 @@
 
 [![Tests](https://github.com/NeelayS/event_aug/actions/workflows/package-test.yml/badge.svg)](https://github.com/NeelayS/event_aug/actions/workflows/package-test.yml)
 
+**[Documentation](https://event_aug.readthedocs.io/en/latest/)** | **[Tutorials](https://github.com/NeelayS/event_aug/tree/main/tutorial_ntbks)**
+
 </div>
 
 
@@ -25,21 +27,20 @@ pip install poetry
 
 ```
 
-Clone the repository and enter working directory:
+Clone the public repository and enter the working directory:
 
 ```bash
 
 git clone https://github.com/NeelayS/event_aug
-cd event_aug
+cd event_aug/
 
 ```
 
 To install the basic version of the package:
 
-
 ```bash
 
-poetry install --no-dev
+poetry install --without dev
 
 ```
 
