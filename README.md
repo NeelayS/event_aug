@@ -10,6 +10,11 @@
 </div>
 
 
+# About
+
+`EventAug` is an open-source Python package that provides methods for augmentation of visual event data. This package was developed as part of the [Google Summer of Code 2022](https://summerofcode.withgoogle.com/) program. A summary of information about the project can be found at [this webpage](https://neelays.github.io/gsoc-2022/).
+
+
 # Installation
 
 
