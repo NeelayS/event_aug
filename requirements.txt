@@ -1,7 +1,7 @@
 cycler==0.11.0; python_version >= "3.7" \
     --hash=sha256:3a27e95f763a428a739d2add979fa7494c912a32c17c4c38c4d5f082cad165a3 \
     --hash=sha256:9c87405839a19696e837b3b818fed3f5f69f16f1eec1a1ad77e043dcea9c772f
-fonttools==4.35.0; python_version >= "3.7"
+fonttools==4.37.1; python_version >= "3.7"
 h5py==3.7.0; python_version >= "3.7"
 kiwisolver==1.4.4; python_version >= "3.7"
 matplotlib==3.5.3; python_version >= "3.7"
@@ -24,7 +24,7 @@ numexpr==2.8.3; python_version >= "3.7"
 numpy-stl==2.17.1 \
     --hash=sha256:36c920192f445dd57f091a63629bdda5a9274d47513a33ac2efad12737394b7a \
     --hash=sha256:c75d4df9cecff7de7bf1e7148dc011c0f4acf9d1c008ef664185c8ecab94ee99
-numpy==1.23.2; python_version >= "3.8"
+numpy==1.23.3; python_version >= "3.8"
 opencv-python==4.6.0.66; python_version >= "3.6" \
     --hash=sha256:c5bfae41ad4031e66bb10ec4a0a2ffd3e514d092652781e8b1ac98d1b59f1158 \
     --hash=sha256:e6e448b62afc95c5b58f97e87ef84699e6607fe5c58730a03301c52496005cae \
