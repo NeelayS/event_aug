@@ -4,6 +4,7 @@
 <div align='center'>
 
 [![Tests](https://github.com/NeelayS/event_aug/actions/workflows/package-test.yml/badge.svg)](https://github.com/NeelayS/event_aug/actions/workflows/package-test.yml)
+[![Docs](https://readthedocs.org/projects/event-aug/badge/?version=latest)](https://event-aug.readthedocs.io/en/latest/?badge=latest)
 
 **[Documentation](https://event_aug.readthedocs.io/en/latest/)** | **[Tutorials](https://github.com/NeelayS/event_aug/tree/main/tutorial_ntbks)**
 
